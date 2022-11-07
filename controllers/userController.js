@@ -64,7 +64,7 @@ module.exports = {
                 { _id: user._id, email },
                 process.env.TOKEN_KEY,
                 {
-                    expiresIn: '30m',
+                    expiresIn: '24h',
                 }
             )
             ///save userToken
@@ -84,7 +84,6 @@ module.exports = {
 
     ///login user
     loginUser: asyncHandler(async (req, res) => {
-        console.log(req.body)
         const { email, password } = req.body
 
         if (!email || !password) {
@@ -99,7 +98,7 @@ module.exports = {
             },
                 process.env.TOKEN_KEY,
                 {
-                    expiresIn: '30m'
+                    expiresIn: '24h'
                 }
             )
             res.status(200).json({
@@ -117,7 +116,14 @@ module.exports = {
 
     ///user details getting
     getUser: asyncHandler(async (req, res) => {
-        res.status(200).json({ message: "user details" })
+        const user = await userModel.findOne({_id:req.user._id})
+        if(user){
+        res.status(200).json(user)
+    }
+    else{
+        res.json({message:'userNotFound'})
+        throw new Error('User not found')
+    }
     })
 
 
