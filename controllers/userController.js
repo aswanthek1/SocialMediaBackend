@@ -18,7 +18,7 @@ module.exports = {
             password,
             // dateofbirth,
             gender,
-           
+
         } = req.body
 
         if (!validateEmail(email)) {
@@ -26,7 +26,7 @@ module.exports = {
             // throw new Error('Invalid email address')
         }
 
-        const check = await userModel.findOne({$or:[{email},{phonenumber}] })
+        const check = await userModel.findOne({ $or: [{ email }, { phonenumber }] })
         if (check) {
             res.json({ message: 'This email already exists, try another one' })
             throw new Error('Email already exists')
@@ -57,8 +57,8 @@ module.exports = {
                 lastname,
                 email,
                 phonenumber,
-                password: bcryptedPassword,              
-                gender,               
+                password: bcryptedPassword,
+                gender,
             }).save()
             const token = jwt.sign(
                 { _id: user._id, email },
@@ -70,11 +70,11 @@ module.exports = {
             ///save userToken
             user.token = token
             res.status(200).json({
-                _id:user._id,
-                firstname:user.firstname,
-                lastname:user.lastname,
-                email:user.email,
-                phonenumber:user.phonenumber,
+                _id: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                phonenumber: user.phonenumber,
                 token
             })
         }
@@ -92,7 +92,7 @@ module.exports = {
         }
         let user = await userModel.findOne({ email: email })
         if (user && (await bcrypt.compare(password, user.password))) {
-           //generating token 
+            //generating token 
             const token = jwt.sign({
                 _id: user._id, email
             },
@@ -116,14 +116,34 @@ module.exports = {
 
     ///user details getting
     getUser: asyncHandler(async (req, res) => {
-        const user = await userModel.findOne({_id:req.user._id})
-        if(user){
-        res.status(200).json(user)
-    }
-    else{
-        res.json({message:'userNotFound'})
-        throw new Error('User not found')
-    }
+        const user = await userModel.findOne({ _id: req.user._id })
+        if (user) {
+            res.status(200).json(user)
+        }
+        else {
+            res.json({ message: 'userNotFound' })
+            throw new Error('User not found')
+        }
+    }),
+
+    ///user Searching
+    userSearch: asyncHandler(async (req, res) => {
+        console.log(req.headers)
+        // if(req.params.data === null){
+        //     res.status(400).json({message:'no entries'})
+        //     throw new Error('nothing entered')
+        // }else{
+        const searchResult = await userModel.find({ $or: [{ firstname: new RegExp('^' + req.params.data, 'i') }, { lastname: new RegExp('^' + req.params.data, 'i') }] })
+        const result = searchResult.map((value) =>
+            value.firstname + " " + value.lastname
+        )
+        if (result) {
+            res.status(200).json(result)
+        } else {
+            res.status(400).json({ message: 'No results' })
+            throw new Error('No results')
+        }
+    // }
     })
 
 
