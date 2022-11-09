@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler')
 const userModel = require('../models/userModel')
+const postModel = require('../models/postModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { validateEmail, validateLength } = require('../helpers/validation')
@@ -16,8 +17,8 @@ module.exports = {
             email,
             phonenumber,
             password,
-            // dateofbirth,
             gender,
+            // dateofbirth,
 
         } = req.body
 
@@ -128,12 +129,13 @@ module.exports = {
 
     ///user Searching
     userSearch: asyncHandler(async (req, res) => {
-        console.log(req.headers)
+        console.log("req.params", req.params.data)
         // if(req.params.data === null){
         //     res.status(400).json({message:'no entries'})
         //     throw new Error('nothing entered')
         // }else{
-        const searchResult = await userModel.find({ $or: [{ firstname: new RegExp('^' + req.params.data, 'i') }, { lastname: new RegExp('^' + req.params.data, 'i') }] })
+        const searchResult = await userModel.find({ firstname: new RegExp('^' + req.params.data, 'i') })
+        console.log("search result ", searchResult)
         const result = searchResult.map((value) =>
             value.firstname + " " + value.lastname
         )
@@ -143,7 +145,26 @@ module.exports = {
             res.status(400).json({ message: 'No results' })
             throw new Error('No results')
         }
-    // }
+        // }
+    }),
+
+    ///add post
+    addPost: asyncHandler(async ( req, res ) => {
+        const { image, description } = req.body
+        const { _id } = req.user
+        console.log(_id)
+        if (!image || !description) {
+            res.json({ message: 'No inputs added' })
+            throw new Error('No inputs Entered')
+        }
+        else if (!_id) {
+            res.json({ message: 'unauthorized' })
+            throw new Error('Un authorized')
+        }
+        else {
+            const post = await new postModel({ description, _id, image }).save()
+            res.status(200).json(post)
+        }
     })
 
 
