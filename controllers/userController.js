@@ -4,6 +4,7 @@ const postModel = require('../models/postModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { validateEmail, validateLength } = require('../helpers/validation')
+const mongoose = require('mongoose')
 
 
 
@@ -151,18 +152,18 @@ module.exports = {
     ///add post
     addPost: asyncHandler(async ( req, res ) => {
         const { image, description } = req.body
-        const { _id } = req.user
-        console.log(_id)
+        const userId = req.user._id
+        console.log(userId)
         if (!image || !description) {
             res.json({ message: 'No inputs added' })
             throw new Error('No inputs Entered')
         }
-        else if (!_id) {
+        else if (!userId) {
             res.json({ message: 'unauthorized' })
             throw new Error('Un authorized')
         }
         else {
-            const post = await new postModel({ description, _id, image }).save()
+            const post = await new postModel({ description, userId, image }).save()
             res.status(200).json(post)
         }
     }),
@@ -177,6 +178,35 @@ module.exports = {
     userLoginAuth: asyncHandler(async( req,res )=>{
         console.log("login",req.users)
         res.status(200).json({messsage:'login auth success'})
+    }),
+
+
+    getPost: asyncHandler(async(req,res)=>{
+        console.log(req.user)
+        try {
+            const id = req.user._id
+            console.log(id,"ddddd")
+            const userId = mongoose.Types.ObjectId(id);
+            console.log(typeof(userId))
+            if(!userId){
+             res.json({message:'no post found'})
+             throw new Error('No post found')
+            }
+            else{
+             let posts = await postModel.find({userId}).sort({createdAt:-1})
+             console.log("posts", posts)
+             if(posts){
+                 res.status(200).json(posts)
+             }
+             else{
+                 res.json({message:"no posts found"})
+                 throw new Error('No posts found')
+             }
+            }
+            
+        } catch (error) {
+            console.log(error)
+        }
     })
 
 
