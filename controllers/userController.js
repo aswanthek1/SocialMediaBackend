@@ -165,6 +165,18 @@ module.exports = {
             const post = await new postModel({ description, _id, image }).save()
             res.status(200).json(post)
         }
+    }),
+
+    //logout auth
+    authState: asyncHandler(async( req, res )=> {
+        console.log("logout",req.users)
+        res.status(200).json({message:'logout authentication successfull'})
+    }),
+
+    //login auth
+    userLoginAuth: asyncHandler(async( req,res )=>{
+        console.log("login",req.users)
+        res.status(200).json({messsage:'login auth success'})
     })
 
 
