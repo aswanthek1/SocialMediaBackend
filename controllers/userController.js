@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler')
+require("dotenv").config()
 const userModel = require('../models/userModel')
 const postModel = require('../models/postModel')
 const jwt = require('jsonwebtoken')
@@ -6,13 +7,12 @@ const bcrypt = require('bcrypt')
 const { validateEmail, validateLength } = require('../helpers/validation')
 const mongoose = require('mongoose')
 
-
+ 
 
 module.exports = {
 
     ///register user
     register: asyncHandler(async (req, res) => {
-        console.log(req.body)
         const { firstname,
             lastname,
             email,
@@ -153,7 +153,6 @@ module.exports = {
     addPost: asyncHandler(async ( req, res ) => {
         const { image, description } = req.body
         const userId = req.user._id
-        console.log(userId)
         if (!image || !description) {
             res.json({ message: 'No inputs added' })
             throw new Error('No inputs Entered')
@@ -185,16 +184,17 @@ module.exports = {
         console.log(req.user)
         try {
             const id = req.user._id
-            console.log(id,"ddddd")
             const userId = mongoose.Types.ObjectId(id);
-            console.log(typeof(userId))
             if(!userId){
              res.json({message:'no post found'})
              throw new Error('No post found')
             }
             else{
-             let posts = await postModel.find({userId}).sort({createdAt:-1})
-             console.log("posts", posts)
+             const posts = await postModel.find({userId}).populate('userId').sort({createdAt:-1})
+            //  const postDate = posts.map((values) => (values.createdAt.toUTCString().slice(0,22)))
+            // //  console.log(postDate)
+            //  posts.push(postDate)
+            //  console.log("posts", posts)
              if(posts){
                  res.status(200).json(posts)
              }

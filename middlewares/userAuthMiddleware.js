@@ -20,7 +20,7 @@ const verifyToken = (req,res,next) => {
             return res.status(401).send('Invalid Token')
         }
         return next();
-    }
+    } 
 }
 
 module.exports = verifyToken
