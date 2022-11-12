@@ -1,26 +1,27 @@
 const mongoose = require('mongoose')
 
 const postSchema = mongoose.Schema({
-    userId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'users'
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
     },
-    description:{
-        type:String,
+    description: {
+        type: String,
     },
-    image:{
-        type:Array
+    image: {
+        type: Array
     },
-    likes:{
-        type:Array
+    likes: {
+        type: Array,
+        default: []
     },
-    comments:{
-        type:Array
+    comments: {
+        type: Array
     },
-    date:{
-        type:Date
+    date: {
+        type: String
     }
 
-},{timestamps:true})
+}, { timestamps: true })
 
-module.exports = mongoose.model('posts',postSchema)
+module.exports = mongoose.model('posts', postSchema)

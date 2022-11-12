@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt')
 const { validateEmail, validateLength } = require('../helpers/validation')
 const mongoose = require('mongoose')
 
- 
+
 
 module.exports = {
 
@@ -150,7 +150,8 @@ module.exports = {
     }),
 
     ///add post
-    addPost: asyncHandler(async ( req, res ) => {
+    addPost: asyncHandler(async (req, res) => {
+        console.log(req.body)
         const { image, description } = req.body
         const userId = req.user._id
         if (!image || !description) {
@@ -162,52 +163,107 @@ module.exports = {
             throw new Error('Un authorized')
         }
         else {
-            const post = await new postModel({ description, userId, image }).save()
+            const date = new Date().toDateString()
+            // const  h = x.getHours();
+            // const m = x.getMinutes();
+            // const s = x.getSeconds();
+            // console.log(date+h+m+s+" dafadfdfd")
+            const post = await new postModel({ description, userId, image, date }).save()
+            console.log('post date', post)
             res.status(200).json(post)
         }
     }),
 
     //logout auth
-    authState: asyncHandler(async( req, res )=> {
-        console.log("logout",req.users)
-        res.status(200).json({message:'logout authentication successfull'})
+    authState: asyncHandler(async (req, res) => {
+        console.log("logout", req.users)
+        res.status(200).json({ message: 'logout authentication successfull' })
     }),
 
     //login auth
-    userLoginAuth: asyncHandler(async( req,res )=>{
-        console.log("login",req.users)
-        res.status(200).json({messsage:'login auth success'})
+    userLoginAuth: asyncHandler(async (req, res) => {
+        console.log("login", req.users)
+        res.status(200).json({ messsage: 'login auth success' })
     }),
 
 
-    getPost: asyncHandler(async(req,res)=>{
+    ///get post 
+    getPost: asyncHandler(async (req, res) => {
         console.log(req.user)
         try {
             const id = req.user._id
             const userId = mongoose.Types.ObjectId(id);
-            if(!userId){
-             res.json({message:'no post found'})
-             throw new Error('No post found')
+            if (!userId) {
+                res.json({ message: 'no post found' })
+                throw new Error('No post found')
             }
-            else{
-             const posts = await postModel.find({userId}).populate('userId').sort({createdAt:-1})
-            //  const postDate = posts.map((values) => (values.createdAt.toUTCString().slice(0,22)))
-            // //  console.log(postDate)
-            //  posts.push(postDate)
-            //  console.log("posts", posts)
-             if(posts){
-                 res.status(200).json(posts)
-             }
-             else{
-                 res.json({message:"no posts found"})
-                 throw new Error('No posts found')
-             }
+            else {
+                const posts = await postModel.find({ userId }).populate('userId').sort({ createdAt: -1 })
+                console.log(posts,"posts are here")
+                // const likes = posts.map((value) => {
+                //     return value.likes
+                // })
+                // const nextLikes = likes.map((values)=>{
+                //     return values[0]
+                // })
+                //  console.log(nextLikes,"likes are here")
+                // for(let i=0 ; i<likes.length-1 ; i++){
+                //     console.log(likes[i])
+                // }
+
+                // const likepost = await postModel.find({posts:{$elemMatch:{likes:{$elemMatch:{users:userId}}}}})
+                //  console.log(likepost,"is it working?")
+
+                // db.users.find({awards: {$elemMatch: {award:'National Medal', year:1975}}})
+                if (posts) {
+                    res.status(200).json(posts)
+                }
+                else {
+                    res.json({ message: "no posts found" })
+                    throw new Error('No posts found')
+                }
             }
-            
+
         } catch (error) {
             console.log(error)
         }
-    })
+    }),
+
+    ///like post
+    postLike: asyncHandler(async (req, res) => {
+        console.log(req.body)
+        let userId = mongoose.Types.ObjectId(req.body.userid)
+        let postid = mongoose.Types.ObjectId(req.body.postid)
+        let likedUser = await postModel.findOne({ _id: postid, likes:[ userId ]})
+        console.log(likedUser, 'userlike')
+        if (likedUser) {
+            let unlike = await postModel.findOneAndUpdate({ _id: postid },
+                {
+                    $pull: { likes:  [userId] }
+                })
+            console.log(unlike, "userUnlike")
+            res.status(200).json({ unlike, message: 'unliked' })
+        } else {
+            let liked = await postModel.findByIdAndUpdate({ _id: postid },
+                {
+                    $push: { likes:  [userId] }
+                })
+    
+            res.status(200).json({ liked, message: 'liked' })
+        }
+
+
+    }),
+
+
+    ///get likes
+    getLikes: asyncHandler(async (req, res) => {
+        const userId = mongoose.Types.ObjectId(req.user._id)
+        const postid = mongoose.Types.ObjectId(req.headers.postid)
+        const likes = await postModel.findById({ _id: postid })
+        const totalLikes = likes.likes.length
+        res.status(200).json({ totalLikes, message: 'totalLikes' })
+    }),
 
 
 }
