@@ -13,6 +13,7 @@ module.exports = {
 
     ///register user
     register: asyncHandler(async (req, res) => {
+        console.log(req.body)
         const { firstname,
             lastname,
             email,
@@ -82,6 +83,39 @@ module.exports = {
         }
     }),
 
+    ///google register
+    googleRegister: asyncHandler(async (req, res) => {
+        console.log("req.body of google", req.body);
+        const email = req.body.email
+        const firstname = req.body.given_name
+        const lastname = req.body.family_name
+        if (!email) {
+            res.json({ message: 'missing credentials' })
+            throw new Error('missing credentials')
+        }
+        const alreadyLogged = await userModel.findOne({ email: email })
+        if (alreadyLogged) {
+            res.json({ message: 'user already exists' })
+            throw new Error('user already exists')
+        }
+        const user = await userModel({
+            email,
+            firstname,
+            lastname
+        })
+        user.save()
+        const token = jwt.sign(
+            { _id: user._id, email },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: '24h'
+            }
+        )
+        console.log(token)
+        res.status(200).json({ user, token })
+
+    }),
+
 
 
     ///login user
@@ -115,6 +149,33 @@ module.exports = {
         }
     }),
 
+    ///google login
+    googleLogin: asyncHandler(async (req, res) => {
+        console.log(req.body, "req.body")
+        const email = req.body.email
+        const user = await userModel.findOne({ email: email })
+        if (!user) {
+            res.json({ message: 'you first signup' })
+            throw new Error('didnt signup yet')
+        }
+        else {
+            const token = jwt.sign({
+                _id: user._id, email
+            },
+                process.env.TOKEN_KEY,
+                {
+                    expiresIn: '24h'
+                }
+            )
+            res.status(200).json({
+                _id: user._id,
+                email: user.email,
+                firstname: user.firstname,
+                token
+            })
+        }
+
+    }),
 
     ///user details getting
     getUser: asyncHandler(async (req, res) => {
@@ -199,22 +260,7 @@ module.exports = {
             }
             else {
                 const posts = await postModel.find({ userId }).populate('userId').sort({ createdAt: -1 })
-                console.log(posts,"posts are here")
-                // const likes = posts.map((value) => {
-                //     return value.likes
-                // })
-                // const nextLikes = likes.map((values)=>{
-                //     return values[0]
-                // })
-                //  console.log(nextLikes,"likes are here")
-                // for(let i=0 ; i<likes.length-1 ; i++){
-                //     console.log(likes[i])
-                // }
-
-                // const likepost = await postModel.find({posts:{$elemMatch:{likes:{$elemMatch:{users:userId}}}}})
-                //  console.log(likepost,"is it working?")
-
-                // db.users.find({awards: {$elemMatch: {award:'National Medal', year:1975}}})
+                console.log(posts, "posts are here")
                 if (posts) {
                     res.status(200).json(posts)
                 }
@@ -229,26 +275,27 @@ module.exports = {
         }
     }),
 
+
     ///like post
     postLike: asyncHandler(async (req, res) => {
         console.log(req.body)
         let userId = mongoose.Types.ObjectId(req.body.userid)
         let postid = mongoose.Types.ObjectId(req.body.postid)
-        let likedUser = await postModel.findOne({ _id: postid, likes:[ userId ]})
+        let likedUser = await postModel.findOne({ _id: postid, likes: [userId] })
         console.log(likedUser, 'userlike')
         if (likedUser) {
             let unlike = await postModel.findOneAndUpdate({ _id: postid },
                 {
-                    $pull: { likes:  [userId] }
+                    $pull: { likes: [userId] }
                 })
             console.log(unlike, "userUnlike")
             res.status(200).json({ unlike, message: 'unliked' })
         } else {
             let liked = await postModel.findByIdAndUpdate({ _id: postid },
                 {
-                    $push: { likes:  [userId] }
+                    $push: { likes: [userId] }
                 })
-    
+
             res.status(200).json({ liked, message: 'liked' })
         }
 
@@ -264,6 +311,35 @@ module.exports = {
         const totalLikes = likes.likes.length
         res.status(200).json({ totalLikes, message: 'totalLikes' })
     }),
+
+
+    ///add comment
+    addComment: asyncHandler(async (req, res) => {
+        const comment = req.body.values.comment
+        const userid = mongoose.Types.ObjectId(req.params.id)
+        const postid = mongoose.Types.ObjectId(req.body.postid)
+        if (!comment) {
+            res.json({ message: 'Enter something' })
+            throw new Error('Enter something')
+        }
+        else {
+            const postComment = await postModel.updateOne({ _id: postid },
+                {
+                   $push: {
+                        comments: {
+                            comment: comment,
+                            commentBy: userid
+                        }
+                    }
+                }
+            )
+
+            console.log('comment is added ', postComment)
+            res.status(200).json({postComment,comment})
+        }
+
+
+    })
 
 
 }
