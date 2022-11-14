@@ -225,13 +225,10 @@ module.exports = {
         }
         else {
             const date = new Date().toDateString()
-            // const  h = x.getHours();
-            // const m = x.getMinutes();
-            // const s = x.getSeconds();
-            // console.log(date+h+m+s+" dafadfdfd")
             const post = await new postModel({ description, userId, image, date }).save()
-            console.log('post date', post)
-            res.status(200).json(post)
+            const addedPost = await postModel.findOne({_id:post._id}).populate('userId')
+            console.log('post date', addedPost)
+            res.status(200).json(addedPost)
         }
     }),
 
@@ -287,16 +284,16 @@ module.exports = {
             let unlike = await postModel.findOneAndUpdate({ _id: postid },
                 {
                     $pull: { likes: [userId] }
-                })
+                }).populate('userId')
             console.log(unlike, "userUnlike")
-            res.status(200).json({ unlike, message: 'unliked' })
+            res.status(200).json({unlike,message:'unliked'})
         } else {
             let liked = await postModel.findByIdAndUpdate({ _id: postid },
                 {
                     $push: { likes: [userId] }
-                })
-
-            res.status(200).json({ liked, message: 'liked' })
+                }).populate('userId')
+             console.log(liked,"liked")
+            res.status(200).json({liked,message:'liked'})
         }
 
 
@@ -309,7 +306,7 @@ module.exports = {
         const postid = mongoose.Types.ObjectId(req.headers.postid)
         const likes = await postModel.findById({ _id: postid })
         const totalLikes = likes.likes.length
-        res.status(200).json({ totalLikes, message: 'totalLikes' })
+        res.status(200).json(totalLikes)
     }),
 
 
@@ -332,10 +329,9 @@ module.exports = {
                         }
                     }
                 }
-            )
-
-            console.log('comment is added ', postComment)
-            res.status(200).json({postComment,comment})
+            )            
+            const commentedPost = await postModel.findOne({_id:postid}).populate('userId')
+            res.status(200).json(commentedPost)
         }
 
 
