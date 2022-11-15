@@ -325,13 +325,12 @@ module.exports = {
                    $push: {
                         comments: {
                             comment: comment,
-                            commentBy: userid
+                            commentBy: userid,
                         }
                     }
                 }
             )            
-            const commentedPost = await postModel.findOne({_id:postid}).populate('userId')
-            res.status(200).json(commentedPost)
+            res.status(200).json(postComment)
         }
 
 

@@ -25,8 +25,8 @@ const postSchema = mongoose.Schema({
                 ref: 'users'
             },
             createdAt: {
-                type: Date,
-                default: new Date()
+                type: String,
+                default: new Date().toDateString()
             }
         }
     ],
