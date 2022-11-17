@@ -226,7 +226,7 @@ module.exports = {
         else {
             const date = new Date().toDateString()
             const post = await new postModel({ description, userId, image, date }).save()
-            const addedPost = await postModel.findOne({_id:post._id}).populate('userId')
+            const addedPost = await postModel.findOne({ _id: post._id }).populate('userId')
             console.log('post date', addedPost)
             res.status(200).json(addedPost)
         }
@@ -286,14 +286,14 @@ module.exports = {
                     $pull: { likes: [userId] }
                 }).populate('userId')
             console.log(unlike, "userUnlike")
-            res.status(200).json({unlike,message:'unliked'})
+            res.status(200).json({ unlike, message: 'unliked' })
         } else {
             let liked = await postModel.findByIdAndUpdate({ _id: postid },
                 {
                     $push: { likes: [userId] }
                 }).populate('userId')
-             console.log(liked,"liked")
-            res.status(200).json({liked,message:'liked'})
+            console.log(liked, "liked")
+            res.status(200).json({ liked, message: 'liked' })
         }
 
 
@@ -322,19 +322,88 @@ module.exports = {
         else {
             const postComment = await postModel.updateOne({ _id: postid },
                 {
-                   $push: {
+                    $push: {
                         comments: {
                             comment: comment,
                             commentBy: userid,
                         }
                     }
                 }
-            )            
+            )
             res.status(200).json(postComment)
         }
 
 
-    })
+    }),
+
+    ///add cover image
+    addCoverImage: asyncHandler(async (req, res) => {
+        let coverimage = req.body.coverimage
+        let userid = mongoose.Types.ObjectId(req.user._id)
+        if (!coverimage) {
+            res.json({ message: 'please select an image' })
+            throw new Error('No image is selected')
+        }
+        else {
+            let user = await userModel.findOne({ _id: userid })
+            if (user.coverimage.length > 0) {
+                let removedCover = await userModel.updateOne({ _id: userid }, { $unset: { coverimage } })
+                let addedCover = await userModel.updateOne({ _id: user },
+                    {
+                        $push: {
+                            coverimage: coverimage
+                        }
+                    }
+                )
+                res.json(addedCover)
+            } else {
+                let addedCover = await userModel.updateOne({ _id: user },
+                    {
+                        $push: {
+                            coverimage: coverimage
+                        }
+                    }
+                )
+                res.json(addedCover)
+            }
+        }
+
+    }),
+
+
+    ///add profile image
+    addProfileImg: asyncHandler(async (req, res) => {
+        const profileimage = req.body.profileimage
+        const userid = mongoose.Types.ObjectId(req.user._id)
+        if (!profileimage) {
+            res.json({ message: 'Add an image' })
+            throw new Error('No image found')
+        }
+        else {
+            let user = await userModel.findOne({ _id: userid })
+            if (user.profileimage.length > 0) {
+                let removedProfile = await userModel.updateOne({ _id: userid }, { $unset: { profileimage } })
+                let addedProfile = await userModel.updateOne({ _id: user },
+                    {
+                        $push: {
+                            profileimage: profileimage
+                        }
+                    }
+                )
+                res.json(addedProfile)
+            } else {
+                let addedProfile = await userModel.updateOne({ _id: user },
+                    {
+                        $push: {
+                            profileimage: profileimage
+                        }
+                    }
+                )
+                res.json(addedProfile)
+            }
+        }
+
+    }),
 
 
 }

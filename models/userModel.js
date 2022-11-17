@@ -33,6 +33,20 @@ const userSchema = mongoose.Schema({
     gender:{
         type:String
     },
+    coverimage:{
+
+    },
+    profileimage:[
+        
+    ],
+    followers:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'users'
+    }],
+    following:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'users'
+    }]
 
 },{timestamps:true})
 
