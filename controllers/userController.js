@@ -192,22 +192,14 @@ module.exports = {
     ///user Searching
     userSearch: asyncHandler(async (req, res) => {
         console.log("req.params", req.params.data)
-        // if(req.params.data === null){
-        //     res.status(400).json({message:'no entries'})
-        //     throw new Error('nothing entered')
-        // }else{
         const searchResult = await userModel.find({ firstname: new RegExp('^' + req.params.data, 'i') })
         console.log("search result ", searchResult)
-        const result = searchResult.map((value) =>
-            value.firstname + " " + value.lastname
-        )
-        if (result) {
-            res.status(200).json(result)
+        if (searchResult) {
+            res.status(200).json(searchResult)
         } else {
             res.status(400).json({ message: 'No results' })
             throw new Error('No results')
         }
-        // }
     }),
 
     ///add post
@@ -380,9 +372,9 @@ module.exports = {
             throw new Error('No image found')
         }
         else {
-            let user = await userModel.findOne({ _id: userid })
+            const user = await userModel.findOne({ _id: userid })
             if (user.profileimage.length > 0) {
-                let removedProfile = await userModel.updateOne({ _id: userid }, { $unset: { profileimage } })
+                const removedProfile = await userModel.updateOne({ _id: userid }, { $unset: { profileimage } })
                 let addedProfile = await userModel.updateOne({ _id: user },
                     {
                         $push: {
@@ -404,6 +396,41 @@ module.exports = {
         }
 
     }),
+
+    ///get all users exept loggined user
+    allUsers: asyncHandler(async (req, res) => {
+        const logginedUser = mongoose.Types.ObjectId(req.user._id)
+        const allUsers = await userModel.find({ _id: { $ne: logginedUser } })
+        if (allUsers) {
+            res.status(200).json(allUsers)
+        }
+        else {
+            res.json({ message: 'no users found' })
+        }
+    }),
+
+    ///add follow 
+    addFollow: asyncHandler(async(req, res) => {
+        console.log(req.body)
+        try {
+            
+            const followUser = mongoose.Types.ObjectId(req.body.id)
+            const user = mongoose.Types.ObjectId(req.user._id)
+            console.log(user)
+            const following = await userModel.updateOne({_id:followUser},
+                {
+                    $push:{
+                        following:[user]
+                    }
+                }
+                )
+                console.log("final followingn", following)
+                res.status(200).json(following)
+            
+        } catch (error) {
+            console.log("erroere",error)
+        }
+    })
 
 
 }

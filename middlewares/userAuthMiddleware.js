@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken')
 const config = process.env
 
 const verifyToken = (req, res, next) => {
+    console.log("valuedation",req.headers.token)
     const token = req.body.token || req.query.token || req.headers.token;
+    console.log("valuedation",token)
     if (!token) {
         res.json({ message: 'A token is required for authentication' })
         throw new Error('No token found')

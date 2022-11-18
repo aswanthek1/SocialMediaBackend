@@ -4,7 +4,7 @@ const userAuth = require('../middlewares/userAuthMiddleware')
 const { register, loginUser, getUser, userSearch, addPost,
     authState, userLoginAuth, getPost, postLike, getLikes,
     googleRegister, googleLogin, addComment, addCoverImage,
-    addProfileImg
+    addProfileImg, allUsers, addFollow
 } = require('../controllers/userController')
 
 router.post('/login', loginUser)
@@ -22,6 +22,8 @@ router.post('/googleLogin', googleLogin)
 router.post('/addComment/:id', addComment)
 router.post('/addCoverImg', userAuth, addCoverImage)
 router.post('/addProfileImg', userAuth, addProfileImg)
+router.get('/allUsers', userAuth, allUsers)
+router.post('/addFollow', userAuth, addFollow)
 
 
 

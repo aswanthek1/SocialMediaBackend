@@ -33,9 +33,9 @@ const userSchema = mongoose.Schema({
     gender:{
         type:String
     },
-    coverimage:{
+    coverimage:[
 
-    },
+    ],
     profileimage:[
         
     ],
