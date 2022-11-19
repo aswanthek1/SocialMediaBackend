@@ -397,40 +397,113 @@ module.exports = {
 
     }),
 
-    ///get all users exept loggined user
+    ///get all users exept loggined user and followed user
     allUsers: asyncHandler(async (req, res) => {
-        const logginedUser = mongoose.Types.ObjectId(req.user._id)
-        const allUsers = await userModel.find({ _id: { $ne: logginedUser } })
-        if (allUsers) {
-            res.status(200).json(allUsers)
-        }
-        else {
-            res.json({ message: 'no users found' })
+        try {
+            const logginedUser = mongoose.Types.ObjectId(req.user._id)
+            console.log(logginedUser, "loggined user")
+            const allUsers = await userModel.find({ _id: { $ne: logginedUser } })
+
+            if (allUsers) {
+                const exceptFollowing = await userModel.find({
+                    $and: [{ _id: { $ne: logginedUser } },
+                    { followers: { $nin: [logginedUser] } }]
+                })
+
+
+                const following = await userModel.find({ followers: { $in: [logginedUser] } })
+
+                const followers = await userModel.find({ following: { $in: [logginedUser] } })
+                console.log('followers', followers)
+
+                res.status(200).json({ allUsers, exceptFollowing, following, followers })
+            }
+            else {
+                res.json({ message: 'no users found' })
+            }
+        } catch (error) {
+            console.log(error)
         }
     }),
 
     ///add follow 
-    addFollow: asyncHandler(async(req, res) => {
-        console.log(req.body)
+    addFollow: asyncHandler(async (req, res) => {
         try {
-            
-            const followUser = mongoose.Types.ObjectId(req.body.id)
+            //alen loginded user
+            //aswanth option user
+            const acceptingUser = mongoose.Types.ObjectId(req.body.id)
             const user = mongoose.Types.ObjectId(req.user._id)
-            console.log(user)
-            const following = await userModel.updateOne({_id:followUser},
+            const following = await userModel.updateOne({ _id: user },
                 {
-                    $push:{
-                        following:[user]
+                    $push: {
+                        following: [acceptingUser]
                     }
                 }
-                )
-                console.log("final followingn", following)
-                res.status(200).json(following)
-            
+            )
+            console.log("follow", following)
+            const follower = await userModel.updateOne({ _id: acceptingUser },
+                {
+                    $push: {
+                        followers: [user]
+                    }
+                }
+            )
+            console.log('followed by', follower)
+            res.status(200).json({ following, follower })
+
         } catch (error) {
-            console.log("erroere",error)
+            console.log("erroere", error)
         }
+    }),
+
+    ///unfollowing 
+    unFollow: asyncHandler(async (req, res) => {
+        try {
+            let logginedUser = mongoose.Types.ObjectId(req.user._id)
+            let unfollowedUser = mongoose.Types.ObjectId(req.body.id)
+            let removeInFollowing = await userModel.updateOne({ _id: logginedUser },
+                {
+                    $pull: {
+                        following: unfollowedUser
+                    }
+                }
+            )
+            let removeInFollower = await userModel.updateOne({ _id: unfollowedUser },
+                {
+                    $pull: {
+                        followers: logginedUser
+                    }
+                }
+            )
+            console.log(removeInFollower)
+            res.status(200).json(removeInFollowing)
+        } catch (error) {
+            console.log(error)
+        }
+    }),
+
+    ///remove followers
+    removeFollowers: asyncHandler(async (req, res) => {
+        try {
+            const logginedUser = mongoose.Types.ObjectId(req.user._id)
+            const removingUser = mongoose.Types.ObjectId(req.body.id)
+            const userRemoveResult = await userModel.updateOne({ _id: logginedUser }, {
+                $pull: {
+                    followers: removingUser
+                }
+            })
+            const removeResult = await userModel.updateOne({ _id: removingUser }, {
+                $pull: {
+                    following: logginedUser
+                }
+            })
+            res.status(200).json(removeResult)
+        } catch (error) {
+            console.log(error)
+        }
+
     })
+
 
 
 }
