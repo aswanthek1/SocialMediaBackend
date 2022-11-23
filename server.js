@@ -1,26 +1,59 @@
-const dotenv = require('dotenv').config()
-const express = require('express')
-const { errorHandler } = require('./middlewares/errorMiddleware')
-const logger = require('morgan')
-const colors = require('colors')
-const cors = require('cors')
-const connectDB = require('./config/db')
-const port =process.env.PORT || 5000
+const dotenv = require("dotenv").config();
+const express = require("express");
+const http = require("http");
+const { errorHandler } = require("./middlewares/errorMiddleware");
+const logger = require("morgan");
+const colors = require("colors");
+const cors = require("cors");
+const { Server } = require("socket.io");
+const connectDB = require("./config/db");
+const port = process.env.PORT || 5000;
 
-connectDB()
+const app = express();
 
-const app = express()
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
+});
 
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({extended: false}))
+connectDB();
 
-app.use(cors({
-    origin: 'http://localhost:3000'
-}));
+app.use(logger("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.use('/', require('./routes/userRoutes'))
-app.use('/posts',require('./routes/postRouter'))
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
-app.use(errorHandler)
-app.listen(port, () => console.log(`Server started at port ${port.rainbow}`))
+io.on("connection", (socket) => {
+  console.log("Connected socket", socket.id);
+
+  socket.on("join_room", (data) => {
+    socket.join(data);
+    console.log(`User with id: ${socket.id} Joined with room: ${data}`)
+  });
+
+  socket.on('send_message', (data) => {
+    console.log(data)
+    const room = data.room.room
+      socket.to(room).emit("receive_message", data)
+  })
+
+  socket.on("disconnect", () => {
+    console.log("User Disconnected", socket.id);
+  });
+});
+
+app.use("/", require("./routes/userRoutes"));
+app.use("/posts", require("./routes/postRouter"));
+
+app.use(errorHandler);
+server.listen(port, () =>
+  console.log(`Server started at port ${port.rainbow}`)
+);
