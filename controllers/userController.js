@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 require("dotenv").config();
 const userModel = require("../models/userModel");
 const postModel = require("../models/postModel");
+const messageModel = require("../models/messageModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { validateEmail, validateLength } = require("../helpers/validation");
@@ -178,9 +179,7 @@ module.exports = {
   ///user Searching
   userSearch: asyncHandler(async (req, res) => {
     try {
-      // console.log(req.headers.user, "body to search")
       const userId = mongoose.Types.ObjectId(req.headers.user);
-      // console.log("req.params", req.params.data)
 
       const searchResult = await userModel.find({
         $and: [
@@ -190,14 +189,15 @@ module.exports = {
       });
 
       //firstname: new RegExp('^' + req.params.data, 'i')
-      console.log("search result ", searchResult);
       if (searchResult) {
         res.status(200).json(searchResult);
       } else {
         res.status(400).json({ message: "No results" });
         throw new Error("No results");
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log("error",error)
+    }
   }),
 
   //logout auth
@@ -218,7 +218,6 @@ module.exports = {
     let userId = mongoose.Types.ObjectId(req.body.userid);
     let postid = mongoose.Types.ObjectId(req.body.postid);
     let likedUser = await postModel.findOne({ _id: postid, likes: [userId] });
-    console.log(likedUser, "userlike");
     if (likedUser) {
       let unlike = await postModel
         .findOneAndUpdate(
@@ -228,7 +227,6 @@ module.exports = {
           }
         )
         .populate("userId");
-      console.log(unlike, "userUnlike");
       res.status(200).json({ unlike, message: "unliked" });
     } else {
       let liked = await postModel
@@ -239,7 +237,6 @@ module.exports = {
           }
         )
         .populate("userId");
-      console.log(liked, "liked");
       res.status(200).json({ liked, message: "liked" });
     }
   }),
@@ -322,7 +319,6 @@ module.exports = {
   allUsers: asyncHandler(async (req, res) => {
     try {
       const logginedUser = mongoose.Types.ObjectId(req.user._id);
-      console.log(logginedUser, "loggined user");
       const allUsers = await userModel.find({ _id: { $ne: logginedUser } });
 
       if (allUsers) {
@@ -340,8 +336,6 @@ module.exports = {
         const followers = await userModel.find({
           following: { $in: [logginedUser] },
         });
-        console.log("followers", followers);
-
         res
           .status(200)
           .json({ allUsers, exceptFollowing, following, followers });
@@ -350,6 +344,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
+      res.status(500).json({message:'error found'})
     }
   }),
 
@@ -438,4 +433,5 @@ module.exports = {
       console.log(error);
     }
   }),
+
 };

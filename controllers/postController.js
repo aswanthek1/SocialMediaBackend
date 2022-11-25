@@ -39,7 +39,7 @@ module.exports = {
                 throw new Error('No post found')
             }
             else {
-                const posts = await postModel.find({ userId }).populate('userId').sort({ createdAt: -1 })
+                const posts = await postModel.find({ userId }).populate('userId').populate('comments.commentBy').sort({ createdAt: -1 })
                 console.log(posts, "posts are here")
                 if (posts) {
                     res.status(200).json(posts)
@@ -103,7 +103,7 @@ module.exports = {
             throw new Error('Enter something')
         }
         else {
-            const postComment = await postModel.updateOne({ _id: postid },
+            const postComment = await postModel.findByIdAndUpdate({ _id: postid },
                 {
                     $push: {
                         comments: {
@@ -112,7 +112,8 @@ module.exports = {
                         }
                     }
                 }
-            )
+            ).populate('comments.commentBy')
+            console.log('commented response', postComment)
             res.status(200).json(postComment)
         }
 

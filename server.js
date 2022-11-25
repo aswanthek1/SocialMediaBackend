@@ -51,6 +51,7 @@ io.on("connection", (socket) => {
 
 app.use("/", require("./routes/userRoutes"));
 app.use("/posts", require("./routes/postRouter"));
+app.use('/chat',require('./routes/chatRouter'))
 
 app.use(errorHandler);
 server.listen(port, () =>
