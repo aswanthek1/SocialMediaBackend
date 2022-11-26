@@ -179,6 +179,7 @@ module.exports = {
   ///user Searching
   userSearch: asyncHandler(async (req, res) => {
     try {
+      console.log('req.params at searching',req.params);
       const userId = mongoose.Types.ObjectId(req.headers.user);
 
       const searchResult = await userModel.find({

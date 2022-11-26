@@ -8,7 +8,9 @@ const messageSchema = mongoose.Schema({
     messages:[{
       roomId:String,
       author:String,
+      authorId:String,
       message:String,
+      receiver:String,
       time:String
     }]
 
