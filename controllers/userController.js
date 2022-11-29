@@ -179,7 +179,7 @@ module.exports = {
   ///user Searching
   userSearch: asyncHandler(async (req, res) => {
     try {
-      console.log('req.params at searching',req.params);
+      console.log("req.params at searching", req.params);
       const userId = mongoose.Types.ObjectId(req.headers.user);
 
       const searchResult = await userModel.find({
@@ -197,7 +197,7 @@ module.exports = {
         throw new Error("No results");
       }
     } catch (error) {
-      console.log("error",error)
+      console.log("error", error);
     }
   }),
 
@@ -345,7 +345,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      res.status(500).json({message:'error found'})
+      res.status(500).json({ message: "error found" });
     }
   }),
 
@@ -434,5 +434,4 @@ module.exports = {
       console.log(error);
     }
   }),
-
 };
