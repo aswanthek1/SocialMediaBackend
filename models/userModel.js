@@ -15,22 +15,10 @@ const userSchema = mongoose.Schema({
     phonenumber:{
         type:Number
     },
-    // dyear:{
-    //     type:Number
-    // },
-    // dday:{
-    //     type:Number
-    // },
-    // dmonth:{
-    //     type:String
-    // },
     dateofbirth:{
         type:'String'
     },
     password:{
-        type:String
-    },
-    gender:{
         type:String
     },
     coverimage:[
@@ -46,7 +34,19 @@ const userSchema = mongoose.Schema({
     following:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'users'
-    }]
+    }],
+    bio:{
+        type:String,
+    },
+    proffession:{
+        type:String
+    },
+    livesin:{
+        type:String
+    },
+    country:{
+        type:String
+    }
 
 },{timestamps:true})
 

@@ -5,7 +5,7 @@ const postModel = require("../models/postModel");
 const messageModel = require("../models/messageModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { validateEmail, validateLength } = require("../helpers/validation");
+const { validateEmail, validateLength, validateWordCount } = require("../helpers/validation");
 const mongoose = require("mongoose");
 
 module.exports = {
@@ -432,6 +432,56 @@ module.exports = {
       res.status(200).json(removeResult);
     } catch (error) {
       console.log(error);
+    }
+  }),
+
+  ///update user
+  updateUser: asyncHandler(async (req, res) => {
+    console.log(req.body);
+    try {
+      const userId = mongoose.Types.ObjectId(req.body.userDetails._id);
+      const {
+        firstname,
+        lastname,
+        bio,
+        proffession,
+        livesin,
+        country,
+        dateofbirth,
+      } = req.body.userDetails;
+      if (!validateLength(firstname, 3, 12)) {
+        res.json({
+          message: "First name need minimum 3 and maximum 12 characters",
+        });
+      } else if (!validateLength(lastname, 1, 12)) {
+        res.json({
+          message: "Last name need minimum 1 and maximum 12 characters",
+        });
+        throw new Error("Last name need minimum 1 and maximum 12 characters");
+      }
+       else if (!validateWordCount(bio)) {
+        res.json({ message: "Maximum 20 words are permitted" });
+        throw new Error("Maximum 20 words are permitted");
+      } 
+      else {
+        const updateUser = await userModel.updateOne({ _id:userId },
+          {
+            // $set:{
+              firstname,
+              lastname,
+              bio,
+              proffession,
+              livesin,
+              country,
+              dateofbirth
+            // }
+          })
+          console.log("updateuserrr", updateUser)
+          res.status(200).json({ message: "user updating details" });
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({message:'error found'})
     }
   }),
 };

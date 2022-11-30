@@ -9,5 +9,8 @@ module.exports = {
         else{
             return true
         }
+    },
+    validateWordCount : (text) => {
+        return String(text).match(/^(?:\b\w+\b[\s\r\n]*){1,20}$/)
     }
 }

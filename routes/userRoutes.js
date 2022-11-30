@@ -16,6 +16,7 @@ const {
   addFollow,
   unFollow,
   removeFollowers,
+  updateUser,
 } = require("../controllers/userController");
 
 router.post("/login", loginUser);
@@ -32,5 +33,6 @@ router.get("/users", userAuth, allUsers);
 router.post("/unFollow", userAuth, unFollow);
 router.post("/addFollow", userAuth, addFollow);
 router.post("/follwers/remove", userAuth, removeFollowers);
+router.put("/user/update", updateUser);
 
 module.exports = router;
