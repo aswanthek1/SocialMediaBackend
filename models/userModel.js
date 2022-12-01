@@ -16,7 +16,7 @@ const userSchema = mongoose.Schema({
         type:Number
     },
     dateofbirth:{
-        type:'String'
+        type:String,
     },
     password:{
         type:String

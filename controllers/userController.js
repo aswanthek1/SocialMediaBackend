@@ -437,7 +437,6 @@ module.exports = {
 
   ///update user
   updateUser: asyncHandler(async (req, res) => {
-    console.log(req.body);
     try {
       const userId = mongoose.Types.ObjectId(req.body.userDetails._id);
       const {
@@ -464,9 +463,8 @@ module.exports = {
         throw new Error("Maximum 20 words are permitted");
       } 
       else {
-        const updateUser = await userModel.updateOne({ _id:userId },
+        const updateUser = await userModel.findByIdAndUpdate({ _id:userId },
           {
-            // $set:{
               firstname,
               lastname,
               bio,
@@ -474,10 +472,9 @@ module.exports = {
               livesin,
               country,
               dateofbirth
-            // }
           })
           console.log("updateuserrr", updateUser)
-          res.status(200).json({ message: "user updating details" });
+          res.status(200).json(updateUser);
       }
     } catch (error) {
       console.log(error)

@@ -11,6 +11,6 @@ module.exports = {
         }
     },
     validateWordCount : (text) => {
-        return String(text).match(/^(?:\b\w+\b[\s\r\n]*){1,20}$/)
+        return String(text).match(/^(?:\b\w+\b[\s\r\n]*){0,20}$/)
     }
 }
