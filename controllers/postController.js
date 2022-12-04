@@ -87,7 +87,6 @@ module.exports = {
           }
         )
         .populate("userId");
-      console.log(liked, "liked");
       res.status(200).json({ liked, message: "liked" });
     }
   }),
@@ -123,8 +122,31 @@ module.exports = {
           }
         )
         .populate("comments.commentBy");
-      console.log("commented response", postComment);
       res.status(200).json(postComment);
     }
   }),
+
+  ///get user posts
+  getUserPost: asyncHandler(async(req, res ) => {
+    try {
+      const userId = mongoose.Types.ObjectId(req.params.id)
+      const userPosts = await postModel.find({userId:userId}).populate('userId').sort({ createdAt: -1 })
+      res.status(200).json(userPosts)
+    } catch (error) {
+      console.log('error', error)
+      res.status(500).json({message:'error found'})                                                                                      
+    }
+  }),
+
+  ///get following peoples posts
+  getAllPosts: asyncHandler(async(req,res) => {
+    try {
+      const allPosts = await postModel.find({}).populate('userId').populate('comments.commentBy').sort({ createdAt: -1 })
+      res.status(200).json(allPosts)
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({messsage:'error found'})
+    }
+  })
+  
 };

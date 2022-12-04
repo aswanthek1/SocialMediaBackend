@@ -5,7 +5,11 @@ const postModel = require("../models/postModel");
 const messageModel = require("../models/messageModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { validateEmail, validateLength, validateWordCount } = require("../helpers/validation");
+const {
+  validateEmail,
+  validateLength,
+  validateWordCount,
+} = require("../helpers/validation");
 const mongoose = require("mongoose");
 
 module.exports = {
@@ -242,77 +246,57 @@ module.exports = {
     }
   }),
 
+
   ///add cover image
   addCoverImage: asyncHandler(async (req, res) => {
-    let coverimage = req.body.coverimage;
-    let userid = mongoose.Types.ObjectId(req.user._id);
-    if (!coverimage) {
-      res.json({ message: "please select an image" });
-      throw new Error("No image is selected");
-    } else {
-      let user = await userModel.findOne({ _id: userid });
-      if (user.coverimage.length > 0) {
-        let removedCover = await userModel.updateOne(
-          { _id: userid },
-          { $unset: { coverimage } }
-        );
-        let addedCover = await userModel.updateOne(
-          { _id: user },
-          {
-            $push: {
-              coverimage: coverimage,
-            },
-          }
-        );
-        res.json(addedCover);
+    try {
+      const coverimage = req.body.coverimage;
+      const userid = mongoose.Types.ObjectId(req.user._id);
+      if (!coverimage) {
+        res.json({ message: "please select an image" });
+        throw new Error("No image is selected");
       } else {
-        let addedCover = await userModel.updateOne(
-          { _id: user },
-          {
-            $push: {
-              coverimage: coverimage,
-            },
-          }
-        );
-        res.json(addedCover);
+        const user = await userModel.findOne({ _id: userid });
+          const addCover = await userModel.findByIdAndUpdate(
+            { _id: userid },
+            {
+              $set: {
+               coverimage: coverimage,
+              },
+            }
+          );
+          res.status(200).json(addCover)
       }
+    } catch (error) {
+      console.log(error)
+      res.status(200).json({ message: "error found" });
     }
   }),
 
+
   ///add profile image
-  addProfileImg: asyncHandler(async (req, res) => {
-    const profileimage = req.body.profileimage;
-    const userid = mongoose.Types.ObjectId(req.user._id);
-    if (!profileimage) {
-      res.json({ message: "Add an image" });
-      throw new Error("No image found");
-    } else {
-      const user = await userModel.findOne({ _id: userid });
-      if (user.profileimage.length > 0) {
-        const removedProfile = await userModel.updateOne(
-          { _id: userid },
-          { $unset: { profileimage } }
-        );
-        let addedProfile = await userModel.updateOne(
-          { _id: user },
-          {
-            $push: {
-              profileimage: profileimage,
-            },
-          }
-        );
-        res.json(addedProfile);
+  addProfileImg: asyncHandler(async(req, res) => {
+    try {
+      const profileimage = req.body.profileimage;
+      const userid = mongoose.Types.ObjectId(req.user._id);
+      if (!profileimage) {
+        res.json({ message: "please select an image" });
+        throw new Error("No image is selected");
       } else {
-        let addedProfile = await userModel.updateOne(
-          { _id: user },
-          {
-            $push: {
-              profileimage: profileimage,
-            },
-          }
-        );
-        res.json(addedProfile);
+        const user = await userModel.findOne({ _id: userid });
+          const addProfile = await userModel.findByIdAndUpdate(
+            { _id: userid },
+            {
+              $set: {
+                profileimage: profileimage,
+              },
+            }
+          );
+          res.status(200).json(addProfile)
       }
+    } catch (error) {
+      console.log(error)
+      res.status(200).json({ message: "error found" });
     }
   }),
 
@@ -457,28 +441,45 @@ module.exports = {
           message: "Last name need minimum 1 and maximum 12 characters",
         });
         throw new Error("Last name need minimum 1 and maximum 12 characters");
-      }
-       else if (!validateWordCount(bio)) {
+      } else if (!validateWordCount(bio)) {
         res.json({ message: "Maximum 20 words are permitted" });
         throw new Error("Maximum 20 words are permitted");
-      } 
-      else {
-        const updateUser = await userModel.findByIdAndUpdate({ _id:userId },
+      } else {
+        const updateUser = await userModel.findByIdAndUpdate(
+          { _id: userId },
           {
-              firstname,
-              lastname,
-              bio,
-              proffession,
-              livesin,
-              country,
-              dateofbirth
-          })
-          console.log("updateuserrr", updateUser)
-          res.status(200).json(updateUser);
+            firstname,
+            lastname,
+            bio,
+            proffession,
+            livesin,
+            country,
+            dateofbirth,
+          }
+        );
+        console.log("updateuserrr", updateUser);
+        res.status(200).json(updateUser);
       }
     } catch (error) {
-      console.log(error)
-      res.status(500).json({message:'error found'})
+      console.log(error);
+      res.status(500).json({ message: "error found" });
+    }
+  }),
+
+  ///data for user profile
+  userProfile: asyncHandler(async (req, res) => {
+    try {
+      console.log("params of profile", req.params);
+      const userId = mongoose.Types.ObjectId(req.params.id);
+      const profileData = await userModel
+        .findOne({ _id: userId })
+        .populate("followers")
+        .populate("following");
+      console.log("user profile data", profileData);
+      res.status(200).json(profileData);
+    } catch (error) {
+      console.log("error", error);
+      res.status(500).json({ message: "error found" });
     }
   }),
 };

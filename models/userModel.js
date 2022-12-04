@@ -1,53 +1,73 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const userSchema = mongoose.Schema({
+const userSchema = mongoose.Schema(
+  {
     firstname: {
-        type: String,
-        text:true
+      type: String,
+      text: true,
     },
-    lastname:{
-        type:String,
-        text:true
+    lastname: {
+      type: String,
+      text: true,
     },
     email: {
-        type: String
+      type: String,
     },
-    phonenumber:{
-        type:Number
+    phonenumber: {
+      type: Number,
     },
-    dateofbirth:{
-        type:String,
+    dateofbirth: {
+      type: String,
     },
-    password:{
+    password: {
+      type: String,
+    },
+    // coverimage: [
+    //   {
+    //     type: Array,
+    //     default: undefined,
+    //   },
+    // ],
+    // profileimage: [
+    //   {
+    //     type: Array,
+    //     default: '',
+    //   },
+    // ],
+    
+    coverimage:{
+      type:String
+    },
+    profileimage:{
         type:String
     },
-    coverimage:[
 
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+      },
     ],
-    profileimage:[
-        
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+      },
     ],
-    followers:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'users'
-    }],
-    following:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'users'
-    }],
-    bio:{
-        type:String,
+    bio: {
+      type: String,
     },
-    proffession:{
-        type:String
+    proffession: {
+      type: String,
     },
-    livesin:{
-        type:String
+    livesin: {
+      type: String,
     },
-    country:{
-        type:String
-    }
+    country: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
-},{timestamps:true})
-
-module.exports = mongoose.model('users',userSchema)
+module.exports = mongoose.model("users", userSchema);
