@@ -34,12 +34,12 @@ const userSchema = mongoose.Schema(
     //     default: '',
     //   },
     // ],
-    
-    coverimage:{
-      type:String
+
+    coverimage: {
+      type: String,
     },
-    profileimage:{
-        type:String
+    profileimage: {
+      type: String,
     },
 
     followers: [
@@ -66,6 +66,12 @@ const userSchema = mongoose.Schema(
     country: {
       type: String,
     },
+    savedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "posts",
+      },
+    ],
   },
   { timestamps: true }
 );

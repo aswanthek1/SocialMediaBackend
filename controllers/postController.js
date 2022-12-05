@@ -127,26 +127,86 @@ module.exports = {
   }),
 
   ///get user posts
-  getUserPost: asyncHandler(async(req, res ) => {
+  getUserPost: asyncHandler(async (req, res) => {
     try {
-      const userId = mongoose.Types.ObjectId(req.params.id)
-      const userPosts = await postModel.find({userId:userId}).populate('userId').sort({ createdAt: -1 })
-      res.status(200).json(userPosts)
+      const userId = mongoose.Types.ObjectId(req.params.id);
+      const userPosts = await postModel
+        .find({ $and: [{ userId: userId }, { deleteVisibility: false }] })
+        .populate("userId")
+        .sort({ createdAt: -1 });
+      res.status(200).json(userPosts);
     } catch (error) {
-      console.log('error', error)
-      res.status(500).json({message:'error found'})                                                                                      
+      console.log("error", error);
+      res.status(500).json({ message: "error found" });
     }
   }),
 
   ///get following peoples posts
-  getAllPosts: asyncHandler(async(req,res) => {
+  getAllPosts: asyncHandler(async (req, res) => {
     try {
-      const allPosts = await postModel.find({}).populate('userId').populate('comments.commentBy').sort({ createdAt: -1 })
-      res.status(200).json(allPosts)
+      const allPosts = await postModel
+        .find({ deleteVisibility: false })
+        .populate("userId")
+        .populate("comments.commentBy")
+        .sort({ createdAt: -1 });
+      res.status(200).json({ allPosts, message: "Post deleted" });
     } catch (error) {
-      console.log(error)
-      res.status(500).json({messsage:'error found'})
+      console.log(error);
+      res.status(500).json({ messsage: "error found" });
     }
-  })
-  
+  }),
+
+  ///delete post
+  deletePost: asyncHandler(async (req, res) => {
+    try {
+      const userId = mongoose.Types.ObjectId(req.body.userId);
+      const postId = mongoose.Types.ObjectId(req.body.postId);
+      const post = await postModel.findOneAndUpdate(
+        { $and: [{ _id: postId }, { userId: userId }] },
+        {
+          $set: {
+            deleteVisibility: true,
+          },
+        }
+      );
+      res.status(200).json(post);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "error found" });
+    }
+  }),
+
+  ///save post
+  savePost: asyncHandler(async (req, res) => {
+    try {
+      const userId = mongoose.Types.ObjectId(req.body.userId);
+      const postId = mongoose.Types.ObjectId(req.body.postId);
+      const user = await userModel.findOne({
+        $and: [
+          {
+            _id: userId,
+          },
+          { savedPosts: { $in: [postId] } },
+        ],
+      });
+      if (user) {
+        const unSave = await userModel.findOneAndUpdate(
+          { _id: userId },
+          { $pull: { savedPosts: postId } }
+        );
+        res.status(200).json({ message: "post unsaved" });
+      } else {
+        const save = await userModel.findOneAndUpdate(
+          { _id: userId },
+          {
+            $push: { savedPosts: postId },
+          }
+        );
+        res.status(200).json({ message: "post saved" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "error found" });
+    }
+  }),
 };

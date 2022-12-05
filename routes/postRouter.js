@@ -8,7 +8,9 @@ const {
   getLikes,
   addComment,
   getUserPost,
-  getAllPosts
+  getAllPosts,
+  deletePost,
+  savePost
 } = require("../controllers/postController");
 
 router.post("/addPost", userAuth, addPost);
@@ -18,5 +20,7 @@ router.get("/getLike", userAuth, getLikes);
 router.post("/addComment/:id", addComment);
 router.get('/getPost/:id', userAuth, getUserPost)
 router.get('/allPosts', userAuth, getAllPosts)
+router.patch('/deletePost', deletePost)
+router.patch('/savePost', savePost)
 
 module.exports = router;
