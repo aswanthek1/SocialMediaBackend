@@ -48,6 +48,7 @@ module.exports = {
           .populate("comments.commentBy")
           .sort({ createdAt: -1 });
         console.log(posts, "posts are here");
+
         if (posts) {
           res.status(200).json(posts);
         } else {
@@ -144,12 +145,34 @@ module.exports = {
   ///get following peoples posts
   getAllPosts: asyncHandler(async (req, res) => {
     try {
+      console.log('useruseruserueruser', req.user)
+      const userId = mongoose.Types.ObjectId(req.user._id)
       const allPosts = await postModel
         .find({ deleteVisibility: false })
         .populate("userId")
         .populate("comments.commentBy")
         .sort({ createdAt: -1 });
-      res.status(200).json({ allPosts, message: "Post deleted" });
+
+
+      const user = await userModel.findOne({_id:userId})
+     
+
+      // for(let i=0; i<user.savedPosts.length; i++){
+      //   for(let j=0; j<allPosts.length; j++){
+      //     console.log(allPosts[j]._id , "kkkkk", user.savedPosts[i])
+      //     if ( user.savedPosts[i]+" " == allPosts[j]._id+" " ){
+      //       allPosts[j].saved = true
+      //        console.log('userid for saved posts', allPosts[j])
+            
+      //     }
+      //     else{
+      //       allPosts[j].saved = false
+      //     }
+      //   }
+      // }
+      
+      console.log('userid for  posts', allPosts)
+       res.status(200).json({ allPosts, message: "Post deleted" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ messsage: "error found" });

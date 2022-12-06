@@ -109,7 +109,7 @@ module.exports = {
     } catch (error) {
       console.log("error", error);
       res.status(500).json(error);
-    } 
+    }
   }),
 
   ///get one chat

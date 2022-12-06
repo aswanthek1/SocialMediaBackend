@@ -37,7 +37,7 @@ const postSchema = mongoose.Schema(
     },
     date: {
       type: String,
-    },
+    }
   },
   { timestamps: true }
 );

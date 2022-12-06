@@ -171,14 +171,19 @@ module.exports = {
 
   ///user details getting
   getUser: asyncHandler(async (req, res) => {
-    const user = await userModel.findOne({ _id: req.user._id }).populate({path:'savedPosts', populate : {path:'userId'}})
-    console.log('user user user', user)
-    // populate({path : 'userId', populate : {path : 'reviewId'}})
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.json({ message: "userNotFound" });
-      throw new Error("User not found");
+    try {
+      const user = await userModel
+        .findOne({ _id: req.user._id })
+        .populate({ path: "savedPosts", populate: { path: "userId" } });
+      if (user) {
+        user.saved = user.savedPosts
+        res.status(200).json(user);
+      } else {
+        res.json({ message: "userNotFound" });
+        throw new Error("User not found");
+      }
+    } catch (error) {
+      console.log(error);
     }
   }),
 
@@ -248,7 +253,6 @@ module.exports = {
     }
   }),
 
-
   ///add cover image
   addCoverImage: asyncHandler(async (req, res) => {
     try {
@@ -259,25 +263,24 @@ module.exports = {
         throw new Error("No image is selected");
       } else {
         const user = await userModel.findOne({ _id: userid });
-          const addCover = await userModel.findByIdAndUpdate(
-            { _id: userid },
-            {
-              $set: {
-               coverimage: coverimage,
-              },
-            }
-          );
-          res.status(200).json(addCover)
+        const addCover = await userModel.findByIdAndUpdate(
+          { _id: userid },
+          {
+            $set: {
+              coverimage: coverimage,
+            },
+          }
+        );
+        res.status(200).json(addCover);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.status(200).json({ message: "error found" });
     }
   }),
 
-
   ///add profile image
-  addProfileImg: asyncHandler(async(req, res) => {
+  addProfileImg: asyncHandler(async (req, res) => {
     try {
       const profileimage = req.body.profileimage;
       const userid = mongoose.Types.ObjectId(req.user._id);
@@ -286,18 +289,18 @@ module.exports = {
         throw new Error("No image is selected");
       } else {
         const user = await userModel.findOne({ _id: userid });
-          const addProfile = await userModel.findByIdAndUpdate(
-            { _id: userid },
-            {
-              $set: {
-                profileimage: profileimage,
-              },
-            }
-          );
-          res.status(200).json(addProfile)
+        const addProfile = await userModel.findByIdAndUpdate(
+          { _id: userid },
+          {
+            $set: {
+              profileimage: profileimage,
+            },
+          }
+        );
+        res.status(200).json(addProfile);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.status(200).json({ message: "error found" });
     }
   }),
@@ -350,7 +353,6 @@ module.exports = {
           },
         }
       );
-      console.log("follow", following);
       const follower = await userModel.updateOne(
         { _id: acceptingUser },
         {
@@ -359,7 +361,6 @@ module.exports = {
           },
         }
       );
-      console.log("followed by", follower);
       res.status(200).json({ following, follower });
     } catch (error) {
       console.log("erroere", error);
@@ -387,7 +388,6 @@ module.exports = {
           },
         }
       );
-      console.log(removeInFollower);
       res.status(200).json(removeInFollowing);
     } catch (error) {
       console.log(error);
@@ -459,7 +459,6 @@ module.exports = {
             dateofbirth,
           }
         );
-        console.log("updateuserrr", updateUser);
         res.status(200).json(updateUser);
       }
     } catch (error) {
@@ -471,13 +470,11 @@ module.exports = {
   ///data for user profile
   userProfile: asyncHandler(async (req, res) => {
     try {
-      console.log("params of profile", req.params);
       const userId = mongoose.Types.ObjectId(req.params.id);
       const profileData = await userModel
         .findOne({ _id: userId })
         .populate("followers")
         .populate("following");
-      console.log("user profile data", profileData);
       res.status(200).json(profileData);
     } catch (error) {
       console.log("error", error);
