@@ -3,8 +3,11 @@ require("dotenv").config();
 const userModel = require("../models/userModel");
 const postModel = require("../models/postModel");
 const messageModel = require("../models/messageModel");
+const otpModel = require('../models/userOtpModel')
+const nodemailer = require('nodemailer')
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const otpHelper = require('../otpController/userOtpController')
 const {
   validateEmail,
   validateLength,
@@ -12,10 +15,10 @@ const {
 } = require("../helpers/validation");
 const mongoose = require("mongoose");
 
+
 module.exports = {
   ///register user
   register: asyncHandler(async (req, res) => {
-    console.log(req.body);
     const {
       firstname,
       lastname,
@@ -54,31 +57,40 @@ module.exports = {
       res.json({ message: "Password need minimum 6 or maximum 16 characters" });
       throw new Error("Password need minimum 6 or maximum 16 characters");
     } else {
-      let bcryptedPassword = await bcrypt.hash(password, 12);
-      console.log(bcryptedPassword);
-      const user = await new userModel({
-        firstname,
-        lastname,
-        email,
-        phonenumber,
-        password: bcryptedPassword,
-        gender,
-      }).save();
-      const token = jwt.sign({ _id: user._id, email }, process.env.TOKEN_KEY, {
-        expiresIn: "24h",
-      });
-      ///save userToken
-      user.token = token;
-      res.status(200).json({
-        _id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        phonenumber: user.phonenumber,
-        token,
-      });
+     otpHelper.sendOtpVerificationMail(email).then((response) => {
+       response.message = 'otp sent'
+       console.log("response of otp",response)
+      res.json(response)
+     })
+      // let bcryptedPassword = await bcrypt.hash(password, 12);
+      // const user = await new userModel({
+      //   firstname,
+      //   lastname,
+      //   email,
+      //   phonenumber,
+      //   password: bcryptedPassword,
+      //   gender,
+      //   verified:false
+      // }).save();
+      
+      // const token = jwt.sign({ _id: user._id, email }, process.env.TOKEN_KEY, {
+      //   expiresIn: "24h",
+      // });
+      // ///save userToken
+      // user.token = token;
+      // res.status(200).json({
+      //   _id: user._id,
+      //   firstname: user.firstname,
+      //   lastname: user.lastname,
+      //   email: user.email,
+      //   phonenumber: user.phonenumber,
+      //   token,
+      // });
     }
   }),
+
+
+
 
   ///google register
   googleRegister: asyncHandler(async (req, res) => {
@@ -107,6 +119,7 @@ module.exports = {
     console.log(token);
     res.status(200).json({ user, token });
   }),
+
 
   ///login user
   loginUser: asyncHandler(async (req, res) => {
