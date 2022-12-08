@@ -2,19 +2,15 @@ const asyncHandler = require("express-async-handler");
 require("dotenv").config();
 const userModel = require("../models/userModel");
 const postModel = require("../models/postModel");
-const messageModel = require("../models/messageModel");
-const otpModel = require('../models/userOtpModel')
-const nodemailer = require('nodemailer')
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const otpHelper = require('../otpController/userOtpController')
+const otpHelper = require("../service/userOtpService");
 const {
   validateEmail,
   validateLength,
   validateWordCount,
 } = require("../helpers/validation");
 const mongoose = require("mongoose");
-
 
 module.exports = {
   ///register user
@@ -57,40 +53,101 @@ module.exports = {
       res.json({ message: "Password need minimum 6 or maximum 16 characters" });
       throw new Error("Password need minimum 6 or maximum 16 characters");
     } else {
-     otpHelper.sendOtpVerificationMail(email).then((response) => {
-       response.message = 'otp sent'
-       console.log("response of otp",response)
-      res.json(response)
-     })
-      // let bcryptedPassword = await bcrypt.hash(password, 12);
-      // const user = await new userModel({
-      //   firstname,
-      //   lastname,
-      //   email,
-      //   phonenumber,
-      //   password: bcryptedPassword,
-      //   gender,
-      //   verified:false
-      // }).save();
-      
-      // const token = jwt.sign({ _id: user._id, email }, process.env.TOKEN_KEY, {
-      //   expiresIn: "24h",
-      // });
-      // ///save userToken
-      // user.token = token;
-      // res.status(200).json({
-      //   _id: user._id,
-      //   firstname: user.firstname,
-      //   lastname: user.lastname,
-      //   email: user.email,
-      //   phonenumber: user.phonenumber,
-      //   token,
-      // });
+      otpHelper.sendOtpVerificationMail(email).then((response) => {
+        response.message = "otp sent";
+        console.log("response of otp", response);
+        res.json(response);
+      });
     }
   }),
 
+  ///register otp
+  registerOTP: asyncHandler(async (req, res) => {
+    try {
+      console.log("body with otp", req.body);
+      const {
+        firstname,
+        lastname,
+        email,
+        phonenumber,
+        password,
+        gender,
+        // dateofbirth,
+      } = req.body;
 
+      if (!validateEmail(email)) {
+        res.status(400).json({ message: "invlaid email address" });
+        // throw new Error('Invalid email address')
+      }
 
+      const check = await userModel.findOne({
+        $or: [{ email }, { phonenumber }],
+      });
+      if (check) {
+        res.json({ message: "This email already exists, try another one" });
+        throw new Error("Email already exists");
+      } else if (!validateLength(firstname, 3, 12)) {
+        res.json({
+          message: "First name need minimum 3 and maximum 12 characters",
+        });
+        throw new Error("First name need minimum 3 and maximum 12 characters");
+      } else if (!validateLength(lastname, 1, 12)) {
+        res.json({
+          message: "Last name need minimum 1 and maximum 12 characters",
+        });
+        throw new Error("Last name need minimum 1 and maximum 12 characters");
+      } else if (!validateLength(phonenumber, 10, 10)) {
+        res.json({ message: "Please enter a valid mobile number" });
+        throw new Error("Please enter a valid mobile number");
+      } else if (!validateLength(password, 6, 16)) {
+        res.json({
+          message: "Password need minimum 6 or maximum 16 characters",
+        });
+        throw new Error("Password need minimum 6 or maximum 16 characters");
+      } else {
+        let bcryptedPassword = await bcrypt.hash(password, 12);
+        const user = await new userModel({
+          firstname,
+          lastname,
+          email,
+          phonenumber,
+          password: bcryptedPassword,
+          gender,
+          verified: false,
+        }).save();
+
+        const token = jwt.sign(
+          { _id: user._id, email },
+          process.env.TOKEN_KEY,
+          {
+            expiresIn: "24h",
+          }
+        );
+        ///save userToken
+        user.token = token;
+        res.status(200).json({
+          _id: user._id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          email: user.email,
+          phonenumber: user.phonenumber,
+          token,
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error found" });
+    }
+  }),
+
+  //resent otp
+  resentOtp: asyncHandler(async (req, res) => {
+    console.log("resenty mail", req.body);
+    otpHelper.sendOtpVerificationMail(req.body.email).then((response) => {
+      response.message = "otp sent";
+      console.log("response of otp resent", response);
+      res.json(response);
+    });
+  }),
 
   ///google register
   googleRegister: asyncHandler(async (req, res) => {
@@ -119,7 +176,6 @@ module.exports = {
     console.log(token);
     res.status(200).json({ user, token });
   }),
-
 
   ///login user
   loginUser: asyncHandler(async (req, res) => {
@@ -182,6 +238,58 @@ module.exports = {
     }
   }),
 
+  ///forgot password email verification
+  forgotPasswordEmail: asyncHandler(async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        res.json({ message: "Enter you email" });
+        throw new Error("Enter email address");
+      } else {
+        const checkEmail = await userModel.findOne({ email: email });
+        if (checkEmail) {
+          res.status(200).json({ message: "User exists" });
+        } else {
+          res.json({ message: "User dosent extists " });
+        }
+      }
+      res.status(200).json({ message: "Emil response is here" });
+    } catch (error) {
+      res.status(500).json({ message: "error found" });
+    }
+  }),
+
+  ///forgot password updating password
+  forgotPassword: asyncHandler(async (req, res) => {
+    try {
+      const { password } = req.body.values;
+      const { email } = req.body;
+      if (!password) {
+        res.json({ message: "Enter password" });
+        throw new Error("Enter password");
+      } else if (!validateLength(!password, 6, 16)) {
+        res.json({ message: "Invalid credentials" });
+        throw new Error("Password need minimum 6 or maximum 16 characters");
+      } else {
+        const user = await userModel.findOne({ email: email });
+        if (user) {
+          const bcryptedPassword = await bcrypt.hash(password, 12);
+          const updatedUser = await userModel.updateOne(
+            { email: email },
+            {
+              password: bcryptedPassword,
+            }
+          );
+          res.status(200).json({ message: "updated" });
+        } else {
+          res.json({ message: "No user found" });
+        }
+      }
+    } catch (error) {
+      res.status(500).json({ message: "error found" });
+    }
+  }),
+
   ///user details getting
   getUser: asyncHandler(async (req, res) => {
     try {
@@ -189,7 +297,7 @@ module.exports = {
         .findOne({ _id: req.user._id })
         .populate({ path: "savedPosts", populate: { path: "userId" } });
       if (user) {
-        user.saved = user.savedPosts
+        user.saved = user.savedPosts;
         res.status(200).json(user);
       } else {
         res.json({ message: "userNotFound" });

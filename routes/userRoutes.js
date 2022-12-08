@@ -18,10 +18,18 @@ const {
   removeFollowers,
   updateUser,
   userProfile,
+  registerOTP,
+  resentOtp,
+  forgotPasswordEmail,
+  forgotPassword
 } = require("../controllers/userController");
 
 router.post("/login", loginUser);
+router.post('/email/forgotPassword', forgotPasswordEmail)
+router.patch('/password/forgotPassword', forgotPassword)
 router.post("/register", register);
+router.post('/register/otp', registerOTP);
+router.post('/otp/resent', resentOtp)
 router.post("/googleLogin", googleLogin);
 router.post("/googleRegister", googleRegister);
 router.get("/userLogoutAuth", userAuth, authState);

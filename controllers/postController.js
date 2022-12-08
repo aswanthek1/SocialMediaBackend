@@ -64,12 +64,12 @@ module.exports = {
   ///like post
   postLike: asyncHandler(async (req, res) => {
     console.log(req.body);
-    let userId = mongoose.Types.ObjectId(req.body.userid);
-    let postid = mongoose.Types.ObjectId(req.body.postid);
-    let likedUser = await postModel.findOne({ _id: postid, likes: [userId] });
+    const userId = mongoose.Types.ObjectId(req.body.userid);
+    const postid = mongoose.Types.ObjectId(req.body.postid);
+    const likedUser = await postModel.findOne({ _id: postid, likes: [userId] });
     console.log(likedUser, "userlike");
     if (likedUser) {
-      let unlike = await postModel
+      const unlike = await postModel
         .findOneAndUpdate(
           { _id: postid },
           {
@@ -145,17 +145,15 @@ module.exports = {
   ///get following peoples posts
   getAllPosts: asyncHandler(async (req, res) => {
     try {
-      console.log('useruseruserueruser', req.user)
-      const userId = mongoose.Types.ObjectId(req.user._id)
+      console.log("useruseruserueruser", req.user);
+      const userId = mongoose.Types.ObjectId(req.user._id);
       const allPosts = await postModel
         .find({ deleteVisibility: false })
         .populate("userId")
         .populate("comments.commentBy")
         .sort({ createdAt: -1 });
 
-
-      const user = await userModel.findOne({_id:userId})
-     
+      const user = await userModel.findOne({ _id: userId });
 
       // for(let i=0; i<user.savedPosts.length; i++){
       //   for(let j=0; j<allPosts.length; j++){
@@ -163,16 +161,16 @@ module.exports = {
       //     if ( user.savedPosts[i]+" " == allPosts[j]._id+" " ){
       //       allPosts[j].saved = true
       //        console.log('userid for saved posts', allPosts[j])
-            
+
       //     }
       //     else{
       //       allPosts[j].saved = false
       //     }
       //   }
       // }
-      
-      console.log('userid for  posts', allPosts)
-       res.status(200).json({ allPosts, message: "Post deleted" });
+
+      console.log("userid for  posts", allPosts);
+      res.status(200).json({ allPosts, message: "Post deleted" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ messsage: "error found" });

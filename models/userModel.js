@@ -22,19 +22,7 @@ const userSchema = mongoose.Schema(
     password: {
       type: String,
     },
-    // coverimage: [
-    //   {
-    //     type: Array,
-    //     default: undefined,
-    //   },
-    // ],
-    // profileimage: [
-    //   {
-    //     type: Array,
-    //     default: '',
-    //   },
-    // ],
-
+    
     coverimage: {
       type: String,
     },
