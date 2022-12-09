@@ -14,7 +14,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://instantse.netlify.app",
+    origin: "https://instantse.netlify.app/",
     methods: ["GET", "POST"],
   },
 });
