@@ -615,4 +615,9 @@ try {
       res.status(500).json({ message: "error found" });
     }
   }),
+
+  ///check working
+  working: (req,res) => {
+    res.send('its here')
+  }
 };

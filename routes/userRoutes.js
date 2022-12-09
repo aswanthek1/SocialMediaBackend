@@ -21,9 +21,11 @@ const {
   registerOTP,
   resentOtp,
   forgotPasswordEmail,
-  forgotPassword
+  forgotPassword,
+  working
 } = require("../controllers/userController");
 
+router.get('/working', working)
 router.post("/login", loginUser);
 router.post('/email/forgotPassword', forgotPasswordEmail)
 router.patch('/password/forgotPassword', forgotPassword)
