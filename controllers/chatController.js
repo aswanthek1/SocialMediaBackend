@@ -5,18 +5,15 @@ const mongoose = require("mongoose");
 module.exports = {
   ///add message for room id
   addMessageForRoomId: asyncHandler(async (req, res) => {
-    console.log(req.body);
     try {
       const authorId = mongoose.Types.ObjectId(req.body.userId);
       const receiverId = mongoose.Types.ObjectId(req.body.value._id);
-      console.log("req.body converted ", authorId, receiverId);
       const checkRoom = await messageModel.findOne({
         users: {
           $all: [authorId, receiverId],
         },
       });
       // .populate("users");
-      console.log("check room", checkRoom);
       if (!checkRoom) {
         const saveMessage = await messageModel.create({
           users: [authorId, receiverId],
@@ -35,7 +32,6 @@ module.exports = {
   ///add message
   addMessage: asyncHandler(async (req, res) => {
     try {
-      console.log("meesage with room id", req.body);
       const authorId = mongoose.Types.ObjectId(req.body.messageData.authorId);
       const receiverId = mongoose.Types.ObjectId(req.body.messageData.receiver);
       let messageData = req.body.messageData;
@@ -104,7 +100,6 @@ module.exports = {
           users: { $in: [userId] },
         })
         .populate("users");
-      console.log("chat for mapping ", chat);
       res.status(200).json(chat);
     } catch (error) {
       console.log("error", error);

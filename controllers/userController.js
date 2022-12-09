@@ -15,56 +15,59 @@ const mongoose = require("mongoose");
 module.exports = {
   ///register user
   register: asyncHandler(async (req, res) => {
-    const {
-      firstname,
-      lastname,
-      email,
-      phonenumber,
-      password,
-      gender,
-      // dateofbirth,
-    } = req.body;
+try {
+  const {
+    firstname,
+    lastname,
+    email,
+    phonenumber,
+    password,
+    gender,
+    // dateofbirth,
+  } = req.body;
 
-    if (!validateEmail(email)) {
-      res.status(400).json({ message: "invlaid email address" });
-      // throw new Error('Invalid email address')
-    }
+  if (!validateEmail(email)) {
+    res.status(400).json({ message: "invlaid email address" });
+    // throw new Error('Invalid email address')
+  }
 
-    const check = await userModel.findOne({
-      $or: [{ email }, { phonenumber }],
+  const check = await userModel.findOne({
+    $or: [{ email }, { phonenumber }],
+  });
+  if (check) {
+    res.json({ message: "This email already exists, try another one" });
+    throw new Error("Email already exists");
+  } else if (!validateLength(firstname, 3, 12)) {
+    res.json({
+      message: "First name need minimum 3 and maximum 12 characters",
     });
-    if (check) {
-      res.json({ message: "This email already exists, try another one" });
-      throw new Error("Email already exists");
-    } else if (!validateLength(firstname, 3, 12)) {
-      res.json({
-        message: "First name need minimum 3 and maximum 12 characters",
-      });
-      throw new Error("First name need minimum 3 and maximum 12 characters");
-    } else if (!validateLength(lastname, 1, 12)) {
-      res.json({
-        message: "Last name need minimum 1 and maximum 12 characters",
-      });
-      throw new Error("Last name need minimum 1 and maximum 12 characters");
-    } else if (!validateLength(phonenumber, 10, 10)) {
-      res.json({ message: "Please enter a valid mobile number" });
-      throw new Error("Please enter a valid mobile number");
-    } else if (!validateLength(password, 6, 16)) {
-      res.json({ message: "Password need minimum 6 or maximum 16 characters" });
-      throw new Error("Password need minimum 6 or maximum 16 characters");
-    } else {
-      otpHelper.sendOtpVerificationMail(email).then((response) => {
-        response.message = "otp sent";
-        console.log("response of otp", response);
-        res.json(response);
-      });
-    }
+    throw new Error("First name need minimum 3 and maximum 12 characters");
+  } else if (!validateLength(lastname, 1, 12)) {
+    res.json({
+      message: "Last name need minimum 1 and maximum 12 characters",
+    });
+    throw new Error("Last name need minimum 1 and maximum 12 characters");
+  } else if (!validateLength(phonenumber, 10, 10)) {
+    res.json({ message: "Please enter a valid mobile number" });
+    throw new Error("Please enter a valid mobile number");
+  } else if (!validateLength(password, 6, 16)) {
+    res.json({ message: "Password need minimum 6 or maximum 16 characters" });
+    throw new Error("Password need minimum 6 or maximum 16 characters");
+  } else {
+    otpHelper.sendOtpVerificationMail(email).then((response) => {
+      response.message = "otp sent";
+      res.json(response);
+    });
+  }
+} catch (error) {
+  console.log(error)
+  res.status(500).json({messsage:'error found'})
+}
   }),
 
   ///register otp
   registerOTP: asyncHandler(async (req, res) => {
     try {
-      console.log("body with otp", req.body);
       const {
         firstname,
         lastname,
@@ -141,101 +144,117 @@ module.exports = {
 
   //resent otp
   resentOtp: asyncHandler(async (req, res) => {
-    console.log("resenty mail", req.body);
-    otpHelper.sendOtpVerificationMail(req.body.email).then((response) => {
-      response.message = "otp sent";
-      console.log("response of otp resent", response);
-      res.json(response);
-    });
+try {
+  otpHelper.sendOtpVerificationMail(req.body.email).then((response) => {
+    response.message = "otp sent";
+    res.json(response);
+  });
+} catch (error) {
+  console.log(error)
+  res.status(500).json({messsage:'error found'})
+}
   }),
 
   ///google register
   googleRegister: asyncHandler(async (req, res) => {
-    console.log("req.body of google", req.body);
-    const email = req.body.email;
-    const firstname = req.body.given_name;
-    const lastname = req.body.family_name;
-    if (!email) {
-      res.json({ message: "missing credentials" });
-      throw new Error("missing credentials");
-    }
-    const alreadyLogged = await userModel.findOne({ email: email });
-    if (alreadyLogged) {
-      res.json({ message: "user already exists" });
-      throw new Error("user already exists");
-    }
-    const user = await userModel({
-      email,
-      firstname,
-      lastname,
-    });
-    user.save();
-    const token = jwt.sign({ _id: user._id, email }, process.env.TOKEN_KEY, {
-      expiresIn: "24h",
-    });
-    console.log(token);
-    res.status(200).json({ user, token });
+try {
+  const email = req.body.email;
+  const firstname = req.body.given_name;
+  const lastname = req.body.family_name;
+  if (!email) {
+    res.json({ message: "missing credentials" });
+    throw new Error("missing credentials");
+  }
+  const alreadyLogged = await userModel.findOne({ email: email });
+  if (alreadyLogged) {
+    res.json({ message: "user already exists" });
+    throw new Error("user already exists");
+  }
+  const user = await userModel({
+    email,
+    firstname,
+    lastname,
+  });
+  user.save();
+  const token = jwt.sign({ _id: user._id, email }, process.env.TOKEN_KEY, {
+    expiresIn: "24h",
+  });
+  console.log(token);
+  res.status(200).json({ user, token });
+} catch (error) {
+  console.log(error)
+  res.status(500).json({messsage:'error found'})
+}
   }),
 
   ///login user
   loginUser: asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+try {
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-      res.json({ message: "Please fill up your details" });
-      throw new Error("Details are missing");
-    }
-    let user = await userModel.findOne({ email: email });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      //generating token
-      const token = jwt.sign(
-        {
-          _id: user._id,
-          email,
-        },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "24h",
-        }
-      );
-      res.status(200).json({
+  if (!email || !password) {
+    res.json({ message: "Please fill up your details" });
+    throw new Error("Details are missing");
+  }
+  let user = await userModel.findOne({ email: email });
+  if (user && (await bcrypt.compare(password, user.password))) {
+    //generating token
+    const token = jwt.sign(
+      {
         _id: user._id,
-        email: user.email,
-        firstname: user.firstname,
-        token,
-      });
-    } else {
-      res.json({ message: "user not found" });
-      throw new Error("User not found");
-    }
+        email,
+      },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "24h",
+      }
+    );
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      firstname: user.firstname,
+      token,
+    });
+  } else {
+    res.json({ message: "user not found" });
+    throw new Error("User not found");
+  }
+} catch (error) {
+  console.log(error)
+  res.status(500).json({messsage:'error found'})
+}
   }),
 
   ///google login
   googleLogin: asyncHandler(async (req, res) => {
-    console.log(req.body, "req.body");
-    const email = req.body.email;
-    const user = await userModel.findOne({ email: email });
-    if (!user) {
-      res.json({ message: "you first signup" });
-      throw new Error("didnt signup yet");
-    } else {
-      const token = jwt.sign(
-        {
-          _id: user._id,
-          email,
-        },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "24h",
-        }
-      );
-      res.status(200).json({
+try {
+  const email = req.body.email;
+  const user = await userModel.findOne({ email: email });
+  if (!user) {
+    res.json({ message: "you first signup" });
+    throw new Error("didnt signup yet");
+  } else {
+    const token = jwt.sign(
+      {
         _id: user._id,
-        email: user.email,
-        firstname: user.firstname,
-        token,
-      });
-    }
+        email,
+      },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "24h",
+      }
+    );
+    res.status(200).json({
+      _id: user._id,
+      email: user.email,
+      firstname: user.firstname,
+      token,
+    });
+  }
+} catch (error) {
+  console.log(error)
+  res.status(500).json({messsage:'error found'})
+}
   }),
 
   ///forgot password email verification
@@ -311,7 +330,6 @@ module.exports = {
   ///user Searching
   userSearch: asyncHandler(async (req, res) => {
     try {
-      console.log("req.params at searching", req.params);
       const userId = mongoose.Types.ObjectId(req.headers.user);
 
       const searchResult = await userModel.find({
@@ -335,19 +353,16 @@ module.exports = {
 
   //logout auth
   authState: asyncHandler(async (req, res) => {
-    console.log("logout", req.users);
     res.status(200).json({ message: "logout authentication successfull" });
   }),
 
   //login auth
   userLoginAuth: asyncHandler(async (req, res) => {
-    console.log("login", req.users);
     res.status(200).json({ messsage: "login auth success" });
   }),
 
   ///like post
   postLike: asyncHandler(async (req, res) => {
-    console.log(req.body);
     let userId = mongoose.Types.ObjectId(req.body.userid);
     let postid = mongoose.Types.ObjectId(req.body.postid);
     let likedUser = await postModel.findOne({ _id: postid, likes: [userId] });
@@ -462,8 +477,6 @@ module.exports = {
   ///add follow
   addFollow: asyncHandler(async (req, res) => {
     try {
-      //alen loginded user
-      //aswanth option user
       const acceptingUser = mongoose.Types.ObjectId(req.body.id);
       const user = mongoose.Types.ObjectId(req.user._id);
       const following = await userModel.updateOne(
