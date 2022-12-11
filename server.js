@@ -14,7 +14,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://instantse.netlify.app/",
+   origin: "https://instantse.netlify.app/",
+  //  origin: 'http://localhost:3000',
     methods: ["GET", "POST"],
   },
 });
@@ -49,7 +50,8 @@ io.on("connection", (socket) => {
 
 app.use("/", require("./routes/userRoutes"));
 app.use("/posts", require("./routes/postRouter"));
-app.use('/chat',require('./routes/chatRouter'))
+app.use('/chat',require('./routes/chatRouter'));
+app.use('/admin', require('./routes/adminRouter'))
 
 app.use(errorHandler);
 server.listen(port, () =>

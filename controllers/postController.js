@@ -3,6 +3,7 @@ require("dotenv").config();
 const userModel = require("../models/userModel");
 const postModel = require("../models/postModel");
 const mongoose = require("mongoose");
+const reportPostModel = require("../models/reportPostModel");
 
 module.exports = {
   ///add post
@@ -228,6 +229,79 @@ module.exports = {
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "error found" });
+    }
+  }),
+
+  ///report post
+  reportPost: asyncHandler(async (req, res) => {
+    try {
+      const reason = req.body.data;
+      const postId = mongoose.Types.ObjectId(req.body.postId);
+      if (req.body.data === "") {
+        res.json({ message: "Choose some thing" });
+        throw new Error("Choose some thing");
+      } else {
+        const reportedPost = await reportPostModel.findOne({ postId: postId });
+        if (reportedPost) {
+          if (reason === "Type1") {
+            const Type1 = await reportPostModel.updateOne(
+              { postId: postId },
+              {
+                Type1: true,
+              }
+            );
+          } else if (reason === "Type2") {
+            const Type2 = await reportPostModel.updateOne(
+              { postId: postId },
+              {
+                Type2: true,
+              }
+            );
+          } else if (reason === "Type3") {
+            const Type3 = await reportPostModel.updateOne(
+              { postId: postId },
+              {
+                Type3: true,
+              }
+            );
+          } else if (reason === "Type4") {
+            const Type4 = await reportPostModel.updateOne(
+              { postId: postId },
+              {
+                Type4: true,
+              }
+            );
+          }
+        } else if (reason === "Type1") {
+          const saveType1 = await reportPostModel({
+            postId: postId,
+            Type1: true,
+          });
+          saveType1.save();
+        } else if (reason === "Type2") {
+          const saveType2 = await reportPostModel({
+            postId: postId,
+            Type2: true,
+          });
+          saveType2.save();
+        } else if (reason === "Type3") {
+          const saveType3 = await reportPostModel({
+            postId: postId,
+            Type3: true,
+          });
+          saveType3.save();
+        } else if (reason === "Type4") {
+          const saveType4 = await reportPostModel({
+            postId: postId,
+            Type4: true,
+          });
+          saveType4.save();
+        }
+        res.status(200).json({ message: "updated" });
+      }
+    } catch (error) {
+      console.log("error", error);
+      res.status(500).json({ message: "error found", error });
     }
   }),
 };

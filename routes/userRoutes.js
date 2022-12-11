@@ -3,7 +3,11 @@ const router = express.Router();
 const userAuth = require("../middlewares/userAuthMiddleware");
 const {
   register,
+  registerOTP,
+  resentOtp,
   loginUser,
+  forgotPasswordEmail,
+  forgotPassword,
   getUser,
   userSearch,
   authState,
@@ -18,10 +22,6 @@ const {
   removeFollowers,
   updateUser,
   userProfile,
-  registerOTP,
-  resentOtp,
-  forgotPasswordEmail,
-  forgotPassword,
   working
 } = require("../controllers/userController");
 

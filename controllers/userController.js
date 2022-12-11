@@ -5,6 +5,7 @@ const postModel = require("../models/postModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const otpHelper = require("../service/userOtpService");
+const adminModel = require('../models/adminModel')
 const {
   validateEmail,
   validateLength,
@@ -34,6 +35,7 @@ try {
   const check = await userModel.findOne({
     $or: [{ email }, { phonenumber }],
   });
+  console.log("check,check")
   if (check) {
     res.json({ message: "This email already exists, try another one" });
     throw new Error("Email already exists");
@@ -65,7 +67,7 @@ try {
 }
   }),
 
-  ///register otp
+  ///register user - verifying otp
   registerOTP: asyncHandler(async (req, res) => {
     try {
       const {
@@ -80,7 +82,6 @@ try {
 
       if (!validateEmail(email)) {
         res.status(400).json({ message: "invlaid email address" });
-        // throw new Error('Invalid email address')
       }
 
       const check = await userModel.findOne({
