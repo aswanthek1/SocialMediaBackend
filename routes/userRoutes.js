@@ -11,7 +11,6 @@ const {
   getUser,
   userSearch,
   authState,
-  userLoginAuth,
   googleRegister,
   googleLogin,
   addCoverImage,
@@ -35,7 +34,7 @@ router.post('/otp/resent', resentOtp)
 router.post("/googleLogin", googleLogin);
 router.post("/googleRegister", googleRegister);
 router.get("/userLogoutAuth", userAuth, authState);
-router.get("/userLoginAuth", userAuth, userLoginAuth);
+router.get("/userLoginAuth", userAuth);
 router.get("/userSearch/:data", userSearch);
 router.post("/addCoverImg", userAuth, addCoverImage);
 router.post("/addProfileImg", userAuth, addProfileImg);

@@ -207,7 +207,7 @@ try {
       },
       process.env.TOKEN_KEY,
       {
-        expiresIn: "24h",
+        expiresIn: "120s",
       }
     );
     res.status(200).json({
@@ -357,10 +357,7 @@ try {
     res.status(200).json({ message: "logout authentication successfull" });
   }),
 
-  //login auth
-  userLoginAuth: asyncHandler(async (req, res) => {
-    res.status(200).json({ messsage: "login auth success" });
-  }),
+
 
   ///like post
   postLike: asyncHandler(async (req, res) => {
