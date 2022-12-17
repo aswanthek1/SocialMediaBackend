@@ -21,7 +21,9 @@ const {
   removeFollowers,
   updateUser,
   userProfile,
-  working
+  working,
+  checkOldPassword,
+  editPassword
 } = require("../controllers/userController");
 
 router.get('/working', working)
@@ -45,5 +47,7 @@ router.post("/addFollow", userAuth, addFollow);
 router.post("/follwers/remove", userAuth, removeFollowers);
 router.put("/user/update", updateUser);
 router.get("/user/profile/:id", userProfile);
+router.patch('/oldPassword/:id', checkOldPassword );
+router.patch('/password/editPassword/:id', editPassword)
 
 module.exports = router;
