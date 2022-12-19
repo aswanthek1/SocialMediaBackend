@@ -12,6 +12,7 @@ const {
   validateWordCount,
 } = require("../helpers/validation");
 const mongoose = require("mongoose");
+const { response } = require("express");
 
 module.exports = {
   ///register user
@@ -270,12 +271,13 @@ module.exports = {
       } else {
         const checkEmail = await userModel.findOne({ email: email });
         if (checkEmail) {
-          res.status(200).json({ message: "User exists" });
+          otpHelper.sendOtpVerificationMail(email).then((otpResponse) => {
+            res.status(200).json({ otpResponse, message: "User exists" });
+          });
         } else {
           res.json({ message: "User dosent extists " });
         }
       }
-      res.status(200).json({ message: "Emil response is here" });
     } catch (error) {
       res.status(500).json({ message: "error found" });
     }
