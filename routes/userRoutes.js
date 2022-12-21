@@ -17,7 +17,7 @@ const {
   addProfileImg,
   allUsers,
   addFollow,
-  unFollow,
+  // unFollow,
   removeFollowers,
   updateUser,
   userProfile,
@@ -42,7 +42,7 @@ router.post("/addCoverImg", userAuth, addCoverImage);
 router.post("/addProfileImg", userAuth, addProfileImg);
 router.get("/", userAuth, getUser);
 router.get("/users", userAuth, allUsers);
-router.post("/unFollow", userAuth, unFollow);
+// router.post("/unFollow", userAuth, unFollow);
 router.post("/addFollow", userAuth, addFollow);
 router.post("/follwers/remove", userAuth, removeFollowers);
 router.put("/user/update", updateUser);

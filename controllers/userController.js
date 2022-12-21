@@ -475,58 +475,105 @@ module.exports = {
   }),
 
   ///add follow
+  // addFollow: asyncHandler(async (req, res) => {
+  //   try {
+  //     const acceptingUser = mongoose.Types.ObjectId(req.body.id);
+  //     const user = mongoose.Types.ObjectId(req.user._id);
+  //     const following = await userModel.updateOne(
+  //       { _id: user },
+  //       {
+  //         $push: {
+  //           following: [acceptingUser],
+  //         },
+  //       }
+  //     );
+  //     const follower = await userModel.updateOne(
+  //       { _id: acceptingUser },
+  //       {
+  //         $push: {
+  //           followers: [user],
+  //         },
+  //       }
+  //     );
+  //     res.status(200).json({ following, follower });
+  //   } catch (error) {
+  //     console.log("erroere", error);
+  //   }
+  // }),
+
   addFollow: asyncHandler(async (req, res) => {
     try {
       const acceptingUser = mongoose.Types.ObjectId(req.body.id);
       const user = mongoose.Types.ObjectId(req.user._id);
-      const following = await userModel.updateOne(
-        { _id: user },
-        {
-          $push: {
-            following: [acceptingUser],
-          },
-        }
-      );
-      const follower = await userModel.updateOne(
-        { _id: acceptingUser },
-        {
-          $push: {
-            followers: [user],
-          },
-        }
-      );
-      res.status(200).json({ following, follower });
+      const checkFollow = await userModel.findOne({ _id: user });
+      if (checkFollow.following.includes(acceptingUser)) {
+        let removeInFollowing = await userModel.updateOne(
+          { _id: user },
+          {
+            $pull: {
+              following: acceptingUser,
+            },
+          }
+        );
+        let removeInFollower = await userModel.updateOne(
+          { _id: acceptingUser },
+          {
+            $pull: {
+              followers: user,
+            },
+          }
+        );
+        res.status(200).json({ message: "unfollowed" });
+      } else {
+        const following = await userModel.updateOne(
+          { _id: user },
+          {
+            $push: {
+              following: [acceptingUser],
+            },
+          }
+        );
+        const follower = await userModel.updateOne(
+          { _id: acceptingUser },
+          {
+            $push: {
+              followers: [user],
+            },
+          }
+        );
+        res.status(200).json({ following, follower, message: "followed" });
+      }
     } catch (error) {
       console.log("erroere", error);
     }
   }),
 
   ///unfollowing
-  unFollow: asyncHandler(async (req, res) => {
-    try {
-      let logginedUser = mongoose.Types.ObjectId(req.user._id);
-      let unfollowedUser = mongoose.Types.ObjectId(req.body.id);
-      let removeInFollowing = await userModel.updateOne(
-        { _id: logginedUser },
-        {
-          $pull: {
-            following: unfollowedUser,
-          },
-        }
-      );
-      let removeInFollower = await userModel.updateOne(
-        { _id: unfollowedUser },
-        {
-          $pull: {
-            followers: logginedUser,
-          },
-        }
-      );
-      res.status(200).json(removeInFollowing);
-    } catch (error) {
-      console.log(error);
-    }
-  }),
+  // unFollow: asyncHandler(async (req, res) => {
+  //   try {
+  //     let logginedUser = mongoose.Types.ObjectId(req.user._id);
+  //     let unfollowedUser = mongoose.Types.ObjectId(req.body.id);
+  //     let removeInFollowing = await userModel.updateOne(
+  //       { _id: logginedUser },
+  //       {
+  //         $pull: {
+  //           following: unfollowedUser,
+  //         },
+  //       }
+  //     );
+  //     let removeInFollower = await userModel.updateOne(
+  //       { _id: unfollowedUser },
+  //       {
+  //         $pull: {
+  //           followers: logginedUser,
+  //         },
+  //       }
+  //     );
+  //     res.status(200).json(removeInFollowing);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }),
 
   ///remove followers
   removeFollowers: asyncHandler(async (req, res) => {

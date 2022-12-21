@@ -19,10 +19,10 @@ router.get("/getPost", userAuth, getPost);
 router.post("/postLike", postLike);
 router.get("/getLike", userAuth, getLikes);
 router.post("/addComment/:id", addComment);
-router.get('/getPost/:id', userAuth, getUserPost)
-router.get('/allPosts', userAuth, getAllPosts)
-router.patch('/deletePost', deletePost)
-router.patch('/savePost', savePost)
-router.post('/reportPost', reportPost)
+router.get("/getPost/:id", userAuth, getUserPost);
+router.get("/allPosts", userAuth, getAllPosts);
+router.patch("/deletePost", deletePost);
+router.patch("/savePost", savePost);
+router.post("/reportPost", reportPost);
 
 module.exports = router;
