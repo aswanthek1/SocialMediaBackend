@@ -12,6 +12,7 @@ const {
   deletePost,
   savePost,
   reportPost,
+  deleteComment,
 } = require("../controllers/postController");
 
 router.post("/addPost", userAuth, addPost);
@@ -19,6 +20,7 @@ router.get("/getPost", userAuth, getPost);
 router.post("/postLike", postLike);
 router.get("/getLike", userAuth, getLikes);
 router.post("/addComment/:id", addComment);
+router.delete("/comment/deleteComment", deleteComment);
 router.get("/getPost/:id", userAuth, getUserPost);
 router.get("/allPosts", userAuth, getAllPosts);
 router.patch("/deletePost", deletePost);

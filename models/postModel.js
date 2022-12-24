@@ -27,7 +27,7 @@ const postSchema = mongoose.Schema(
         },
         createdAt: {
           type: String,
-          default: new Date().toDateString(),
+          default: new Date(),
         },
       },
     ],

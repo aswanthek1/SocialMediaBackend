@@ -12,7 +12,6 @@ const {
   validateWordCount,
 } = require("../helpers/validation");
 const mongoose = require("mongoose");
-const { response } = require("express");
 
 module.exports = {
   ///register user
@@ -356,9 +355,19 @@ module.exports = {
     }
   }),
 
-  //logout auth
-  authState: asyncHandler(async (req, res) => {
-    res.status(200).json({ message: "logout authentication successfull" });
+  ///login auth
+  loginAuth: asyncHandler(async (req, res) => {
+    console.log("req .user for login", req.user);
+    try {
+      if (req.user) {
+        res.status(200).json({ status: true });
+      } else {
+        res.json({ status: false });
+        throw new Error("Issues with token");
+      }
+    } catch (error) {
+      res.status(500).json({ message: "error found on auth", error });
+    }
   }),
 
   ///like post
@@ -474,33 +483,6 @@ module.exports = {
     }
   }),
 
-  ///add follow
-  // addFollow: asyncHandler(async (req, res) => {
-  //   try {
-  //     const acceptingUser = mongoose.Types.ObjectId(req.body.id);
-  //     const user = mongoose.Types.ObjectId(req.user._id);
-  //     const following = await userModel.updateOne(
-  //       { _id: user },
-  //       {
-  //         $push: {
-  //           following: [acceptingUser],
-  //         },
-  //       }
-  //     );
-  //     const follower = await userModel.updateOne(
-  //       { _id: acceptingUser },
-  //       {
-  //         $push: {
-  //           followers: [user],
-  //         },
-  //       }
-  //     );
-  //     res.status(200).json({ following, follower });
-  //   } catch (error) {
-  //     console.log("erroere", error);
-  //   }
-  // }),
-
   addFollow: asyncHandler(async (req, res) => {
     try {
       const acceptingUser = mongoose.Types.ObjectId(req.body.id);
@@ -547,33 +529,6 @@ module.exports = {
       console.log("erroere", error);
     }
   }),
-
-  ///unfollowing
-  // unFollow: asyncHandler(async (req, res) => {
-  //   try {
-  //     let logginedUser = mongoose.Types.ObjectId(req.user._id);
-  //     let unfollowedUser = mongoose.Types.ObjectId(req.body.id);
-  //     let removeInFollowing = await userModel.updateOne(
-  //       { _id: logginedUser },
-  //       {
-  //         $pull: {
-  //           following: unfollowedUser,
-  //         },
-  //       }
-  //     );
-  //     let removeInFollower = await userModel.updateOne(
-  //       { _id: unfollowedUser },
-  //       {
-  //         $pull: {
-  //           followers: logginedUser,
-  //         },
-  //       }
-  //     );
-  //     res.status(200).json(removeInFollowing);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }),
 
   ///remove followers
   removeFollowers: asyncHandler(async (req, res) => {
