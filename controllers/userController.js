@@ -270,9 +270,14 @@ module.exports = {
       } else {
         const checkEmail = await userModel.findOne({ email: email });
         if (checkEmail) {
-          otpHelper.sendOtpVerificationMail(email).then((otpResponse) => {
-            res.status(200).json({ otpResponse, message: "User exists" });
-          });
+          otpHelper
+            .sendOtpVerificationMail(email)
+            .then((otpResponse) => {
+              res.status(200).json({ otpResponse, message: "User exists" });
+            })
+            .catch((error) => {
+              console.log("error", error);
+            });
         } else {
           res.json({ message: "User dosent extists " });
         }
