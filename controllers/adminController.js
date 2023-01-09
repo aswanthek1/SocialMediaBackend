@@ -7,6 +7,7 @@ const { validateEmail, validateLength } = require("../helpers/validation");
 const reportPostModel = require("../models/reportPostModel");
 const mongoose = require("mongoose");
 const postModel = require("../models/postModel");
+const userModel = require("../models/userModel");
 
 module.exports = {
   ///admin login
@@ -98,4 +99,33 @@ module.exports = {
       res.status(500).json({ messsage: "error found", error });
     }
   }),
+
+  ///get users
+  getUsers: asyncHandler(async(req, res) => {
+    try {
+      const users = await userModel.find()
+      res.status(200).json(users)
+    } catch (error) {
+      res.status(500).json({message:'Error found', error})
+    }
+  }),
+
+  ///user Actions
+  userAction: asyncHandler(async(req,res) => {
+    try {
+      const userId = mongoose.Types.ObjectId(req.params.id)
+      const user = await userModel.findOne({_id:userId})
+      if(!user.accessDenied){
+        const block = await userModel.updateOne({_id:userId},{accessDenied:true})
+        res.status(200).json({message:'blocked'})
+      }
+      else{
+        const block = await userModel.updateOne({_id:userId},{accessDenied:false})
+        res.status(200).json({message:'activate'})
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({message:'error found', error})
+    }
+  })
 };

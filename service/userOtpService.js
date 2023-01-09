@@ -1,8 +1,6 @@
 const asyncHandler = require("express-async-handler");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
-const { response } = require("express");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -23,8 +21,6 @@ module.exports = {
           subject: "Verify Your Email ",
           html: `This is your verification code ${otp}`,
         };
-
-        const hashedOtp = await bcrypt.hash(otp, 10);
         await transporter
           .sendMail(mailOptions)
           .then((response) => {

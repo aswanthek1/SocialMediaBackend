@@ -65,7 +65,7 @@ const userSchema = mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
       },
     ],
-    verified: {
+    accessDenied: {
       type: Boolean,
     },
   },
