@@ -149,15 +149,12 @@ module.exports = {
   ///delete comment
   deleteComment: asyncHandler(async (req, res) => {
     try {
-      console.log(req.body.commentId, "req . body for deleteing comment");
       const postId = mongoose.Types.ObjectId(req.body.postId);
       const commentId = mongoose.Types.ObjectId(req.body.commentId);
-      console.log(commentId, "req . body for deleteing comment", postId);
       const post = await postModel.updateOne(
         { _id: postId },
         { $pull: { comments: { _id: commentId } } }
       );
-      console.log("post for deltecomment", post);
       res.status(200).json({ message: "Comment Deleted" });
     } catch (error) {
       console.log("error", error);

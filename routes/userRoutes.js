@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userAuth = require("../middlewares/userAuthMiddleware");
+const {userAccess} = require('../service/userAccessService')
 const {
   register,
   registerOTP,
@@ -26,6 +27,7 @@ const {
 } = require("../controllers/userController");
 
 router.get('/working', working)
+router.get('/userAccessCheck',userAccess )
 router.post("/login", loginUser);
 router.post('/email/forgotPassword', forgotPasswordEmail)
 router.patch('/password/forgotPassword', forgotPassword)

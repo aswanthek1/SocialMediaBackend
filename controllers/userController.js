@@ -321,6 +321,7 @@ module.exports = {
   ///user details getting
   getUser: asyncHandler(async (req, res) => {
     try {
+      console.log("req.asfsdfdsfdsfdsfdsfdsf", req.user);
       const user = await userModel
         .findOne({ _id: req.user._id })
         .populate({ path: "savedPosts", populate: { path: "userId" } });
