@@ -10,11 +10,8 @@ module.exports = {
   addPost: asyncHandler(async (req, res) => {
     try {
       const { image, description } = req.body;
-      const userId = req.user._id;
-      if (!image || !description) {
-        res.json({ message: "No inputs added" });
-        throw new Error("No inputs Entered");
-      } else if (!userId) {
+      const userId = req.user._id; 
+       if (!userId) {
         res.json({ message: "unauthorized" });
         throw new Error("Un authorized");
       } else {
